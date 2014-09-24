@@ -42,7 +42,7 @@ namespace FedAllChampionsUtility
 
             //Drawing.OnDraw += onDraw;
             Game.OnGameUpdate += OnGameUpdate;            
-            Obj_AI_Base.OnProcessSpellCast += OnProcessSpell;
+            //Obj_AI_Base.OnProcessSpellCast += OnProcessSpell;
 
             PluginLoaded();
         }
@@ -104,7 +104,7 @@ namespace FedAllChampionsUtility
 
         private static void OnGameUpdate(EventArgs args)
         {
-            //loaidraw();
+            loaidraw();
             CastR_kill();
             target = SimpleTs.GetTarget(1500, SimpleTs.DamageType.Physical);
             checkLock(target);
