@@ -66,24 +66,7 @@ namespace FedAllChampionsUtility
             Program.Menu.SubMenu("Combo").AddItem(new MenuItem("UseRCombo", "Use R")).SetValue(true);
             Program.Menu.SubMenu("Combo").AddItem(new MenuItem("ActiveCombo", "Combo!").SetValue(new KeyBind(32, KeyBindType.Press)));            
 
-            Program.Menu.AddSubMenu(new Menu("Harass", "Harass"));
-            Program.Menu.SubMenu("Harass").AddItem(new MenuItem("ActiveHarass", "Harass!").SetValue((new KeyBind("C".ToCharArray()[0], KeyBindType.Press, false))));
-
-            Program.Menu.AddSubMenu(new Menu("Insec", "Insec"));
-            Program.Menu.SubMenu("Insec").AddItem(new MenuItem("ActiveInsec", "Insec!").SetValue((new KeyBind("G".ToCharArray()[0], KeyBindType.Press, false))));
-
-            Program.Menu.AddSubMenu(new Menu("KillSteal", "KillSteal"));
-            Program.Menu.SubMenu("KillSteal").AddItem(new MenuItem("UseR", "R killsteal")).SetValue(true);
-
-            Program.Menu.AddSubMenu(new Menu("WardJump", "WardJump"));
-            Program.Menu.SubMenu("WardJump").AddItem(new MenuItem("ActiveWard", "WardJump!").SetValue((new KeyBind("Z".ToCharArray()[0], KeyBindType.Press, false))));
-
-            Program.Menu.AddSubMenu(new Menu("Drawings", "Drawings"));
-            Program.Menu.SubMenu("Drawings").AddItem(new MenuItem("DrawQ", "Draw Q")).SetValue(true);
-            Program.Menu.SubMenu("Drawings").AddItem(new MenuItem("DrawE", "Draw E")).SetValue(true);
-            Program.Menu.SubMenu("Drawings").AddItem(new MenuItem("DrawW", "Draw W")).SetValue(true);
-            Program.Menu.SubMenu("Drawings").AddItem(new MenuItem("DrawR", "Draw R")).SetValue(true);
-            Program.Menu.SubMenu("Drawings").AddItem(new MenuItem("DrawInsec", "Draw Insec")).SetValue(true);            
+                  
         }
 
         private void checkLock(Obj_AI_Hero target)
@@ -459,6 +442,55 @@ namespace FedAllChampionsUtility
             }
             return false;
         }
-        
+        private void onDraw(EventArgs args)
+        {
+            if (Program.Menu.Item("DrawQ").GetValue<bool>())
+            {
+                if (Q.Level > 0)
+                    Utility.DrawCircle(ObjectManager.Player.Position, 1100, Q.IsReady() ? Color.Green : Color.Red);
+            }
+            if (Program.Menu.Item("DrawW").GetValue<bool>())
+            {
+                if (W.Level > 0)
+                    Utility.DrawCircle(ObjectManager.Player.Position, 700, W.IsReady() ? Color.Green : Color.Red);
+            }
+            if (Program.Menu.Item("DrawE").GetValue<bool>())
+            {
+                if (W.Level > 0)
+                    Utility.DrawCircle(ObjectManager.Player.Position, 350, E.IsReady() ? Color.Green : Color.Red);
+            }
+            if (Program.Menu.Item("DrawR").GetValue<bool>())
+            {
+                if (R.Level > 0)
+                Utility.DrawCircle(ObjectManager.Player.Position, 375, R.IsReady() ? Color.Green : Color.Red);
+            }
+            if (Program.Menu.Item("DrawInsec").GetValue<bool>() && LeeSin.R.IsReady())
+            {
+                if (!loaidraw())
+                {
+                    Vector2 heroPos = Drawing.WorldToScreen(LockedTarget.Position);
+                    Vector2 diempos = Drawing.WorldToScreen(getward1(LockedTarget));
+                    Drawing.DrawLine(heroPos[0], heroPos[1], diempos[0], diempos[1], 1, System.Drawing.Color.White);
+                }
+                else
+                {
+                    Vector2 heroPos = Drawing.WorldToScreen(LockedTarget.Position);
+                    Vector2 diempos = Drawing.WorldToScreen(getward3(LockedTarget));
+                    Drawing.DrawLine(heroPos[0], heroPos[1], diempos[0], diempos[1], 1, System.Drawing.Color.White);
+                }
+            }
+        }
+        private void OnProcessSpell(LeagueSharp.Obj_AI_Base obj, LeagueSharp.GameObjectProcessSpellCastEventArgs arg)
+        {
+            if (testSpells.ToList().Contains(arg.SData.Name))
+            {
+                testSpellCast = arg.End.To2D();
+                Polygon pol;
+                if ((pol = Program.map.getInWhichPolygon(arg.End.To2D())) != null)
+                {
+                    testSpellProj = pol.getProjOnPolygon(arg.End.To2D());
+                }
+            }
+        }
     }
 }
