@@ -41,7 +41,7 @@ namespace FedAllChampionsUtility
             LoadSpells();
 
             //Drawing.OnDraw += onDraw;
-            Game.OnGameUpdate += OnGameUpdate;            
+            //Game.OnGameUpdate += OnGameUpdate;            
             //Obj_AI_Base.OnProcessSpellCast += OnProcessSpell;
 
             PluginLoaded();
@@ -66,7 +66,24 @@ namespace FedAllChampionsUtility
             Program.Menu.SubMenu("Combo").AddItem(new MenuItem("UseRCombo", "Use R")).SetValue(true);
             Program.Menu.SubMenu("Combo").AddItem(new MenuItem("ActiveCombo", "Combo!").SetValue(new KeyBind(32, KeyBindType.Press)));            
 
-                  
+            Program.Menu.AddSubMenu(new Menu("Harass", "Harass"));
+            Program.Menu.SubMenu("Harass").AddItem(new MenuItem("ActiveHarass", "Harass!").SetValue((new KeyBind("C".ToCharArray()[0], KeyBindType.Press, false))));
+
+            Program.Menu.AddSubMenu(new Menu("Insec", "Insec"));
+            Program.Menu.SubMenu("Insec").AddItem(new MenuItem("ActiveInsec", "Insec!").SetValue((new KeyBind("G".ToCharArray()[0], KeyBindType.Press, false))));
+
+            Program.Menu.AddSubMenu(new Menu("KillSteal", "KillSteal"));
+            Program.Menu.SubMenu("KillSteal").AddItem(new MenuItem("UseR", "R killsteal")).SetValue(true);
+
+            Program.Menu.AddSubMenu(new Menu("WardJump", "WardJump"));
+            Program.Menu.SubMenu("WardJump").AddItem(new MenuItem("ActiveWard", "WardJump!").SetValue((new KeyBind("Z".ToCharArray()[0], KeyBindType.Press, false))));
+
+            Program.Menu.AddSubMenu(new Menu("Drawings", "Drawings"));
+            Program.Menu.SubMenu("Drawings").AddItem(new MenuItem("DrawQ", "Draw Q")).SetValue(true);
+            Program.Menu.SubMenu("Drawings").AddItem(new MenuItem("DrawE", "Draw E")).SetValue(true);
+            Program.Menu.SubMenu("Drawings").AddItem(new MenuItem("DrawW", "Draw W")).SetValue(true);
+            Program.Menu.SubMenu("Drawings").AddItem(new MenuItem("DrawR", "Draw R")).SetValue(true);
+            Program.Menu.SubMenu("Drawings").AddItem(new MenuItem("DrawInsec", "Draw Insec")).SetValue(true);            
         }
 
         private void checkLock(Obj_AI_Hero target)
