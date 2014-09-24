@@ -459,55 +459,6 @@ namespace FedAllChampionsUtility
             }
             return false;
         }
-        private void onDraw(EventArgs args)
-        {
-            if (Program.Menu.Item("DrawQ").GetValue<bool>())
-            {
-                if (Q.Level > 0)
-                    Utility.DrawCircle(ObjectManager.Player.Position, 1100, Q.IsReady() ? Color.Green : Color.Red);
-            }
-            if (Program.Menu.Item("DrawW").GetValue<bool>())
-            {
-                if (W.Level > 0)
-                    Utility.DrawCircle(ObjectManager.Player.Position, 700, W.IsReady() ? Color.Green : Color.Red);
-            }
-            if (Program.Menu.Item("DrawE").GetValue<bool>())
-            {
-                if (W.Level > 0)
-                    Utility.DrawCircle(ObjectManager.Player.Position, 350, E.IsReady() ? Color.Green : Color.Red);
-            }
-            if (Program.Menu.Item("DrawR").GetValue<bool>())
-            {
-                if (R.Level > 0)
-                Utility.DrawCircle(ObjectManager.Player.Position, 375, R.IsReady() ? Color.Green : Color.Red);
-            }
-            if (Program.Menu.Item("DrawInsec").GetValue<bool>() && LeeSin.R.IsReady())
-            {
-                if (!loaidraw())
-                {
-                    Vector2 heroPos = Drawing.WorldToScreen(LockedTarget.Position);
-                    Vector2 diempos = Drawing.WorldToScreen(getward1(LockedTarget));
-                    Drawing.DrawLine(heroPos[0], heroPos[1], diempos[0], diempos[1], 1, System.Drawing.Color.White);
-                }
-                else
-                {
-                    Vector2 heroPos = Drawing.WorldToScreen(LockedTarget.Position);
-                    Vector2 diempos = Drawing.WorldToScreen(getward3(LockedTarget));
-                    Drawing.DrawLine(heroPos[0], heroPos[1], diempos[0], diempos[1], 1, System.Drawing.Color.White);
-                }
-            }
-        }
-        private void OnProcessSpell(LeagueSharp.Obj_AI_Base obj, LeagueSharp.GameObjectProcessSpellCastEventArgs arg)
-        {
-            if (testSpells.ToList().Contains(arg.SData.Name))
-            {
-                testSpellCast = arg.End.To2D();
-                Polygon pol;
-                if ((pol = Program.map.getInWhichPolygon(arg.End.To2D())) != null)
-                {
-                    testSpellProj = pol.getProjOnPolygon(arg.End.To2D());
-                }
-            }
-        }
+        
     }
 }
