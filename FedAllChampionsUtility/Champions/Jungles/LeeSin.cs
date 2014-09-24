@@ -59,31 +59,30 @@ namespace FedAllChampionsUtility
         }
 
         private void LoadMenu()
-        {            
-            Program.Menu.AddSubMenu(new Menu("Combo", "Combo"));
-            Program.Menu.SubMenu("Combo").AddItem(new MenuItem("UseQCombo", "Use Q")).SetValue(true);
-            Program.Menu.SubMenu("Combo").AddItem(new MenuItem("UseECombo", "Use E")).SetValue(true);
-            Program.Menu.SubMenu("Combo").AddItem(new MenuItem("UseRCombo", "Use R")).SetValue(true);
-            Program.Menu.SubMenu("Combo").AddItem(new MenuItem("ActiveCombo", "Combo!").SetValue(new KeyBind(32, KeyBindType.Press)));            
+        {
+            Program.Menu.AddSubMenu(new Menu("TeamFight", "TeamFight"));
+            Program.Menu.SubMenu("TeamFight").AddItem(new MenuItem("useQ_TeamFight", "Use Q").SetValue(true));
+            Program.Menu.SubMenu("TeamFight").AddItem(new MenuItem("useW_TeamFight", "Use W").SetValue(true));
+            Program.Menu.SubMenu("TeamFight").AddItem(new MenuItem("useE_TeamFight", "Use E").SetValue(true));
 
             Program.Menu.AddSubMenu(new Menu("Harass", "Harass"));
-            Program.Menu.SubMenu("Harass").AddItem(new MenuItem("ActiveHarass", "Harass!").SetValue((new KeyBind("C".ToCharArray()[0], KeyBindType.Press, false))));
+            Program.Menu.SubMenu("Harass").AddItem(new MenuItem("useQ_Harass", "Use Q").SetValue(true));
+            Program.Menu.SubMenu("Harass").AddItem(new MenuItem("useW_Harass", "Use W").SetValue(true));
 
-            Program.Menu.AddSubMenu(new Menu("Insec", "Insec"));
-            Program.Menu.SubMenu("Insec").AddItem(new MenuItem("ActiveInsec", "Insec!").SetValue((new KeyBind("G".ToCharArray()[0], KeyBindType.Press, false))));
+            Program.Menu.AddSubMenu(new Menu("LaneClear", "LaneClear"));
+            Program.Menu.SubMenu("LaneClear").AddItem(new MenuItem("useQ_LaneClear", "Use Q").SetValue(true));
+            Program.Menu.SubMenu("LaneClear").AddItem(new MenuItem("useW_LaneClear", "Use W").SetValue(true));
+            Program.Menu.SubMenu("LaneClear").AddItem(new MenuItem("useE_LaneClear", "Use E").SetValue(true));
 
-            Program.Menu.AddSubMenu(new Menu("KillSteal", "KillSteal"));
-            Program.Menu.SubMenu("KillSteal").AddItem(new MenuItem("UseR", "R killsteal")).SetValue(true);
+            Program.Menu.AddSubMenu(new Menu("LastHit", "LastHit"));
+            Program.Menu.SubMenu("LastHit").AddItem(new MenuItem("useQ_LastHit", "Use Q").SetValue(true));
 
-            Program.Menu.AddSubMenu(new Menu("WardJump", "WardJump"));
-            Program.Menu.SubMenu("WardJump").AddItem(new MenuItem("ActiveWard", "WardJump!").SetValue((new KeyBind("Z".ToCharArray()[0], KeyBindType.Press, false))));
 
-            Program.Menu.AddSubMenu(new Menu("Drawings", "Drawings"));
-            Program.Menu.SubMenu("Drawings").AddItem(new MenuItem("DrawQ", "Draw Q")).SetValue(true);
-            Program.Menu.SubMenu("Drawings").AddItem(new MenuItem("DrawE", "Draw E")).SetValue(true);
-            Program.Menu.SubMenu("Drawings").AddItem(new MenuItem("DrawW", "Draw W")).SetValue(true);
-            Program.Menu.SubMenu("Drawings").AddItem(new MenuItem("DrawR", "Draw R")).SetValue(true);
-            Program.Menu.SubMenu("Drawings").AddItem(new MenuItem("DrawInsec", "Draw Insec")).SetValue(true);            
+            Program.Menu.AddSubMenu(new Menu("Drawing", "Drawing"));
+            Program.Menu.SubMenu("Drawing").AddItem(new MenuItem("Draw_Disabled", "Disable All").SetValue(false));
+            Program.Menu.SubMenu("Drawing").AddItem(new MenuItem("Draw_Q", "Draw Q").SetValue(true));
+            Program.Menu.SubMenu("Drawing").AddItem(new MenuItem("Draw_W", "Draw W").SetValue(true));
+            Program.Menu.SubMenu("Drawing").AddItem(new MenuItem("Draw_E", "Draw E").SetValue(true));        
         }
     }
 }
