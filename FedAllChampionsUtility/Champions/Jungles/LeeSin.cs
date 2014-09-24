@@ -86,7 +86,7 @@ namespace FedAllChampionsUtility
             Program.Menu.SubMenu("Drawings").AddItem(new MenuItem("DrawInsec", "Draw Insec")).SetValue(true);            
         }
 
-        public static void checkLock(Obj_AI_Hero target)
+        private void checkLock(Obj_AI_Hero target)
         {
             //if (!target.IsValidTarget())
             //    return;
@@ -102,7 +102,7 @@ namespace FedAllChampionsUtility
             }
         }
 
-        private static void OnGameUpdate(EventArgs args)
+        private void OnGameUpdate(EventArgs args)
         {
             loaidraw();
             CastR_kill();
@@ -142,7 +142,7 @@ namespace FedAllChampionsUtility
 
             }
         }
-        public static void Combo()
+        private void Combo()
         {
             if (!Combo2 && ObjectManager.Player.Distance(LockedTarget) > 375)
             {
@@ -168,7 +168,7 @@ namespace FedAllChampionsUtility
                 }
             }
         }
-        public static void doHarass()
+        private void doHarass()
         {
             if (LockedTarget == null)
                 return;
@@ -178,7 +178,7 @@ namespace FedAllChampionsUtility
                     if (!castEFirst())
                         getBackHarass();
         }
-        public static void useinsec()
+        private void useinsec()
         {
             foreach (Obj_AI_Hero hero in ObjectManager.Get<Obj_AI_Hero>())
             {
@@ -193,7 +193,7 @@ namespace FedAllChampionsUtility
             }
 
         }
-        public static void insec()
+        private void insec()
         {
             if (!R.IsReady())
             {
@@ -222,7 +222,7 @@ namespace FedAllChampionsUtility
 
             }
         }
-        public static void insec1()
+        private void insec1()
         {
             if (!R.IsReady())
             {
@@ -252,7 +252,7 @@ namespace FedAllChampionsUtility
 
             }
         }
-        public static bool getBackHarass()
+        private bool getBackHarass()
         {
             Obj_AI_Turret closest_tower = ObjectManager.Get<Obj_AI_Turret>().Where(tur => tur.IsAlly).OrderBy(tur => tur.Distance(Player.ServerPosition)).First();
             Obj_AI_Base jumpOn = ObjectManager.Get<Obj_AI_Base>().Where(ally => ally.IsAlly && !(ally is Obj_AI_Turret) && !ally.IsMe && ally.Distance(LeeSin.Player.ServerPosition) < 700).OrderBy(tur => tur.Distance(closest_tower.ServerPosition)).First();
@@ -260,7 +260,7 @@ namespace FedAllChampionsUtility
             // wardJump(closest_tower.Position.To2D());
             return false;
         }
-        public static bool castQFirstSmart()
+        private bool castQFirstSmart()
         {
             if (!Q.IsReady() || Qdata.Name != "BlindMonkQOne" || LockedTarget == null)
                 return false;
@@ -273,7 +273,7 @@ namespace FedAllChampionsUtility
             }
             return true;
         }
-        public static bool castQSecondSmart()
+        private bool castQSecondSmart()
         {
             if (Qdata.Name != "blindmonkqtwo" || LockedTarget == null)
                 return false;
@@ -284,7 +284,7 @@ namespace FedAllChampionsUtility
             }
             return true;
         }
-        public static bool targetHasQ(Obj_AI_Hero target)
+        private bool targetHasQ(Obj_AI_Hero target)
         {
             foreach (BuffInstance buf in target.Buffs)
             {
@@ -293,7 +293,7 @@ namespace FedAllChampionsUtility
             }
             return false;            
         }
-        public static bool targetHasUlti(Obj_AI_Hero target)
+        private bool targetHasUlti(Obj_AI_Hero target)
         {
             foreach (BuffInstance buf in target.Buffs)
             {
@@ -302,7 +302,7 @@ namespace FedAllChampionsUtility
             }
             return true;            
         }
-        public static bool castEFirst()
+        private bool castEFirst()
         {
             if (!E.IsReady() || LockedTarget == null || Edata.Name != "BlindMonkEOne")
                 return false;
@@ -313,7 +313,7 @@ namespace FedAllChampionsUtility
             }
             return true;
         }
-        public static bool castE2()
+        private bool castE2()
         {
             if (LockedTarget == null) return false;
             if (inDistance(LockedTarget.Position.To2D(), Player.ServerPosition.To2D(), 350))
@@ -323,14 +323,14 @@ namespace FedAllChampionsUtility
             }
             return true;
         }
-        public static void castR()
+        private void castR()
         {
             var target = SimpleTs.GetTarget(375, SimpleTs.DamageType.Physical);
             if (target == null || !R.IsReady() || !Program.Menu.Item("UseRCombo").GetValue<bool>())
                 return;
             R.Cast(target);
         }
-        public static void CastR_kill()
+        private void CastR_kill()
         {
             foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(hero => hero.IsValidTarget(R.Range) && DamageLib.getDmg(hero, DamageLib.SpellType.R) >= hero.Health))
             {
@@ -339,7 +339,7 @@ namespace FedAllChampionsUtility
                 return;
             }
         }
-        public static void castRKill()
+        private void castRKill()
         {
             if (!Program.Menu.Item("UseRcombo").GetValue<bool>())
                 return;
@@ -351,7 +351,7 @@ namespace FedAllChampionsUtility
                 return;
             R.Cast(LockedTarget);
         }
-        public static int getJumpWardId()
+        private int getJumpWardId()
         {
             int[] wardIds = { 3340, 3350, 3205, 3207, 2049, 2045, 2044, 3361, 3154, 3362, 3160, 2043 };
             foreach (int id in wardIds)
@@ -361,11 +361,11 @@ namespace FedAllChampionsUtility
             }
             return -1;
         }
-        public static void moveTo(Vector2 Pos)
+        private void moveTo(Vector2 Pos)
         {
             Player.IssueOrder(GameObjectOrder.MoveTo, Pos.To3D());
         }
-        public static void wardJump(Vector2 pos)
+        private void wardJump(Vector2 pos)
         {
             Vector2 posStart = pos;
             if (!W.IsReady())
@@ -412,7 +412,7 @@ namespace FedAllChampionsUtility
             }
 
         }
-        public static bool putWard(Vector2 pos)
+        private bool putWard(Vector2 pos)
         {
             int wardItem;
             if ((wardItem = getJumpWardId()) != -1)
@@ -425,32 +425,32 @@ namespace FedAllChampionsUtility
             }
             return false;
         }
-        public static bool inDistance(Vector2 pos1, Vector2 pos2, float distance)
+        private bool inDistance(Vector2 pos1, Vector2 pos2, float distance)
         {
             float dist2 = Vector2.DistanceSquared(pos1, pos2);
             return (dist2 <= distance * distance) ? true : false;
         }
-        public static Vector3 getward(Obj_AI_Hero target)
+        private Vector3 getward(Obj_AI_Hero target)
         {
             Obj_AI_Turret turret = ObjectManager.Get<Obj_AI_Turret>().Where(tur => tur.IsAlly && tur.Health > 0 && !tur.IsMe).OrderBy(tur => tur.Distance(Player.ServerPosition)).First();
             return target.ServerPosition + Vector3.Normalize(turret.ServerPosition - target.ServerPosition) * (-300);
         }
-        public static Vector3 getward2(Obj_AI_Hero target)
+        private Vector3 getward2(Obj_AI_Hero target)
         {
             Obj_AI_Hero hero = ObjectManager.Get<Obj_AI_Hero>().Where(tur => tur.IsAlly && tur.Health > 0 && !tur.IsMe).OrderBy(tur => tur.Distance(Player.ServerPosition)).First();
             return target.ServerPosition + Vector3.Normalize(hero.ServerPosition - target.ServerPosition) * (-300);
         }
-        public static Vector3 getward1(Obj_AI_Hero target)
+        private Vector3 getward1(Obj_AI_Hero target)
         {
             Obj_AI_Turret turret = ObjectManager.Get<Obj_AI_Turret>().Where(tur => tur.IsAlly && tur.Health > 0 && !tur.IsMe).OrderBy(tur => tur.Distance(Player.ServerPosition)).First();
             return target.Position + Vector3.Normalize(turret.Position - target.Position) * (600);
         }
-        public static Vector3 getward3(Obj_AI_Hero target)
+        private Vector3 getward3(Obj_AI_Hero target)
         {
             Obj_AI_Hero hero = ObjectManager.Get<Obj_AI_Hero>().Where(tur => tur.IsAlly && tur.Health > 0 && !tur.IsMe).OrderBy(tur => tur.Distance(Player.ServerPosition)).First();
             return target.Position + Vector3.Normalize(hero.Position - target.Position) * (600);
         }
-        public static bool loaidraw()
+        private bool loaidraw()
         {
             foreach (Obj_AI_Hero hero1 in ObjectManager.Get<Obj_AI_Hero>())
             {
@@ -459,7 +459,7 @@ namespace FedAllChampionsUtility
             }
             return false;
         }
-        private static void onDraw(EventArgs args)
+        private void onDraw(EventArgs args)
         {
             if (Program.Menu.Item("DrawQ").GetValue<bool>())
             {
@@ -483,21 +483,21 @@ namespace FedAllChampionsUtility
             }
             if (Program.Menu.Item("DrawInsec").GetValue<bool>() && LeeSin.R.IsReady())
             {
-                if (!LeeSin.loaidraw())
+                if (!loaidraw())
                 {
-                    Vector2 heroPos = Drawing.WorldToScreen(LeeSin.LockedTarget.Position);
-                    Vector2 diempos = Drawing.WorldToScreen(LeeSin.getward1(LeeSin.LockedTarget));
+                    Vector2 heroPos = Drawing.WorldToScreen(LockedTarget.Position);
+                    Vector2 diempos = Drawing.WorldToScreen(getward1(LockedTarget));
                     Drawing.DrawLine(heroPos[0], heroPos[1], diempos[0], diempos[1], 1, System.Drawing.Color.White);
                 }
                 else
                 {
-                    Vector2 heroPos = Drawing.WorldToScreen(LeeSin.LockedTarget.Position);
-                    Vector2 diempos = Drawing.WorldToScreen(LeeSin.getward3(LeeSin.LockedTarget));
+                    Vector2 heroPos = Drawing.WorldToScreen(LockedTarget.Position);
+                    Vector2 diempos = Drawing.WorldToScreen(getward3(LockedTarget));
                     Drawing.DrawLine(heroPos[0], heroPos[1], diempos[0], diempos[1], 1, System.Drawing.Color.White);
                 }
             }
         }
-        public static void OnProcessSpell(LeagueSharp.Obj_AI_Base obj, LeagueSharp.GameObjectProcessSpellCastEventArgs arg)
+        private void OnProcessSpell(LeagueSharp.Obj_AI_Base obj, LeagueSharp.GameObjectProcessSpellCastEventArgs arg)
         {
             if (testSpells.ToList().Contains(arg.SData.Name))
             {
