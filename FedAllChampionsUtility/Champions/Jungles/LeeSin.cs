@@ -38,7 +38,7 @@ namespace FedAllChampionsUtility
         public LeeSin()
         {
             LoadMenu();
-            LoadMenu();
+            LoadSpells();
 
             //Drawing.OnDraw += onDraw;
             Game.OnGameUpdate += OnGameUpdate;            
