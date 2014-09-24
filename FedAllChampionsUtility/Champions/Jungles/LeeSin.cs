@@ -17,8 +17,7 @@ namespace FedAllChampionsUtility
     {
         public static Vector2 testSpellCast;
         public static Vector2 testSpellProj;
-        public static Obj_AI_Hero Player = ObjectManager.Player;
-        public static Map map;
+        public static Obj_AI_Hero Player = ObjectManager.Player;        
         public static Obj_AI_Hero target;
 
         public static string[] testSpells = { "RelicSmallLantern", "RelicLantern", "SightWard", "wrigglelantern", "ItemGhostWard", "VisionWard",
@@ -393,7 +392,7 @@ namespace FedAllChampionsUtility
                 return;
             }
             Polygon pol;
-            if ((pol = map.getInWhichPolygon(pos)) != null)
+            if ((pol = Program.map.getInWhichPolygon(pos)) != null)
             {
                 if (inDistance(pol.getProjOnPolygon(pos), Player.ServerPosition.To2D(), W.Range + 15) && !wardIs && inDistance(pol.getProjOnPolygon(pos), pos, 200))
                 {
@@ -505,7 +504,7 @@ namespace FedAllChampionsUtility
             {
                 testSpellCast = arg.End.To2D();
                 Polygon pol;
-                if ((pol = map.getInWhichPolygon(arg.End.To2D())) != null)
+                if ((pol = Program.map.getInWhichPolygon(arg.End.To2D())) != null)
                 {
                     testSpellProj = pol.getProjOnPolygon(arg.End.To2D());
                 }

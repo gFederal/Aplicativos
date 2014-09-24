@@ -12,6 +12,7 @@ namespace FedAllChampionsUtility
 		public static Orbwalking.Orbwalker Orbwalker;
         public static Azir.Orbwalking.Orbwalker Azirwalker;
         public static Helper Helper;
+        public static Map map;
         
 
         private static void Main(string[] args)
@@ -33,6 +34,7 @@ namespace FedAllChampionsUtility
             {
 
                 Helper = new Helper();
+                map = new Map();
 
                 Menu = new Menu("FedAllChampionsUtility", "FedAllChampionsUtility_" + ObjectManager.Player.ChampionName, true);
 
