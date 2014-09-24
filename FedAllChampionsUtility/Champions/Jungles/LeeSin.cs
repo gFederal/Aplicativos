@@ -40,7 +40,7 @@ namespace FedAllChampionsUtility
             LoadMenu();
             LoadMenu();
 
-            Drawing.OnDraw += onDraw;
+            //Drawing.OnDraw += onDraw;
             Game.OnGameUpdate += OnGameUpdate;            
             Obj_AI_Base.OnProcessSpellCast += OnProcessSpell;
 
