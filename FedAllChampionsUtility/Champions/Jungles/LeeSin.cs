@@ -64,8 +64,7 @@ namespace FedAllChampionsUtility
             Program.Menu.SubMenu("Combo").AddItem(new MenuItem("UseQCombo", "Use Q")).SetValue(true);
             Program.Menu.SubMenu("Combo").AddItem(new MenuItem("UseECombo", "Use E")).SetValue(true);
             Program.Menu.SubMenu("Combo").AddItem(new MenuItem("UseRCombo", "Use R")).SetValue(true);
-            Program.Menu.SubMenu("Combo").AddItem(new MenuItem("ActiveCombo", "Combo!").SetValue(new KeyBind(32, KeyBindType.Press)));
-            Program.Menu.SubMenu("Combo").AddItem(new MenuItem("ActiveCombo1", "Combo2!").SetValue((new KeyBind("X".ToCharArray()[0], KeyBindType.Press, false))));
+            Program.Menu.SubMenu("Combo").AddItem(new MenuItem("ActiveCombo", "Combo!").SetValue(new KeyBind(32, KeyBindType.Press)));            
 
             Program.Menu.AddSubMenu(new Menu("Harass", "Harass"));
             Program.Menu.SubMenu("Harass").AddItem(new MenuItem("ActiveHarass", "Harass!").SetValue((new KeyBind("C".ToCharArray()[0], KeyBindType.Press, false))));
@@ -105,7 +104,7 @@ namespace FedAllChampionsUtility
 
         private static void OnGameUpdate(EventArgs args)
         {
-            loaidraw();
+            //loaidraw();
             CastR_kill();
             target = SimpleTs.GetTarget(1500, SimpleTs.DamageType.Physical);
             checkLock(target);
