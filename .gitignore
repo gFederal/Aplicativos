@@ -214,7 +214,3 @@ pip-log.txt
 
 #Mr Developer
 .mr.developer.cfg
-FedAllChampionsUtility/FedLeagueOfLegends.sln
-FedAllChampionsUtility/FedAllChampionsUtility.csproj
-FedAllChampionsUtility//Properties/Resources.Designer.cs
-*.csproj
