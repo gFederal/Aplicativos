@@ -40,9 +40,9 @@ namespace FedAllChampionsUtility
             LoadMenu();
             LoadSpells();
 
-            //Drawing.OnDraw += onDraw;
-            //Game.OnGameUpdate += OnGameUpdate;            
-            //Obj_AI_Base.OnProcessSpellCast += OnProcessSpell;
+            Drawing.OnDraw += onDraw;
+            Game.OnGameUpdate += OnGameUpdate;            
+            Obj_AI_Base.OnProcessSpellCast += OnProcessSpell;
 
             PluginLoaded();
         }
