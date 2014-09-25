@@ -32,9 +32,7 @@ namespace FedAllChampionsUtility
 
         public static Obj_AI_Hero LockedTarget;
         public static float lastwardjump = 0;
-        public static bool daInsec = false;
-        public static bool Combo1 = false;
-        public static bool Combo2 = false;
+        public static bool daInsec = false;        
         public LeeSin()
         {
             LoadMenu();
@@ -64,7 +62,8 @@ namespace FedAllChampionsUtility
             Program.Menu.SubMenu("Combo").AddItem(new MenuItem("UseQCombo", "Use Q")).SetValue(true);
             Program.Menu.SubMenu("Combo").AddItem(new MenuItem("UseECombo", "Use E")).SetValue(true);
             Program.Menu.SubMenu("Combo").AddItem(new MenuItem("UseRCombo", "Use R")).SetValue(true);
-            Program.Menu.SubMenu("Combo").AddItem(new MenuItem("ActiveCombo", "Combo!").SetValue(new KeyBind(32, KeyBindType.Press)));            
+            Program.Menu.SubMenu("Combo").AddItem(new MenuItem("ActiveCombo", "Combo!").SetValue(new KeyBind(32, KeyBindType.Press)));
+            Program.Menu.SubMenu("Combo").AddItem(new MenuItem("ActiveCombo2", "Combo 2!").SetValue(new KeyBind("A".ToCharArray()[0], KeyBindType.Press)));
 
             Program.Menu.AddSubMenu(new Menu("Harass", "Harass"));
             Program.Menu.SubMenu("Harass").AddItem(new MenuItem("ActiveHarass", "Harass!").SetValue((new KeyBind("C".ToCharArray()[0], KeyBindType.Press, false))));
@@ -108,13 +107,7 @@ namespace FedAllChampionsUtility
             CastR_kill();
             target = SimpleTs.GetTarget(1500, SimpleTs.DamageType.Physical);
             checkLock(target);
-            Program.Orbwalker.SetAttacks(true);
-
-            if (!Program.Menu.Item("ActiveCombo").GetValue<KeyBind>().Active)
-            {
-                Combo1 = false;
-                Combo2 = false;
-            }
+            Program.Orbwalker.SetAttacks(true);            
 
             if (Program.Menu.Item("ActiveWard").GetValue<KeyBind>().Active)
             {
@@ -131,6 +124,11 @@ namespace FedAllChampionsUtility
             {
                 Combo();
             }
+            if (Program.Menu.Item("ActiveCombo2").GetValue<KeyBind>().Active)
+            {
+                Combo2();
+
+            }
 
             if (Program.Menu.Item("ActiveInsec").GetValue<KeyBind>().Active)
             {
@@ -144,28 +142,24 @@ namespace FedAllChampionsUtility
         }
         private void Combo()
         {
-            if (!Combo2 && ObjectManager.Player.Distance(LockedTarget) > 375)
+            castQFirstSmart();
+            castQSecondSmart();
+            castEFirst();
+            castE2();
+            castR();
+ 
+        }
+        private void Combo2()
+        {
+            if (inDistance(LockedTarget.Position.To2D(), Player.ServerPosition.To2D(), 375))
             {
-                Combo1 = true;
                 castQFirstSmart();
-                castQSecondSmart();
                 castEFirst();
+                if (targetHasQ(LockedTarget))
+                    R.Cast(LockedTarget);
+                if (!R.IsReady())
+                    castQSecondSmart();
                 castE2();
-                castR();
-            }
-            else
-            {
-                if (!Combo1 && inDistance(LockedTarget.Position.To2D(), Player.ServerPosition.To2D(), 375))
-                {
-                    Combo2 = true;
-                    castQFirstSmart();
-                    castEFirst();
-                    if (targetHasQ(LockedTarget))
-                        R.Cast(LockedTarget);
-                    if (!R.IsReady())
-                        castQSecondSmart();
-                    castE2();
-                }
             }
         }
         private void doHarass()
