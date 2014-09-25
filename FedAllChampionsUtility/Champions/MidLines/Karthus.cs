@@ -212,7 +212,7 @@ namespace FedAllChampionsUtility
                 return;
             var minions = MinionManager.GetMinions(ObjectManager.Player.ServerPosition, _spellQ.Range, MinionTypes.All, MinionTeam.NotAlly);
 
-            foreach (var minion in minions.Where(x => ObjectManager.Player.GetSpellDamage(x, SpellSlot.Q, DamageLib.StageType.FirstDamage) >= //FirstDamage = multitarget hit, differentiate! (check radius around mob predicted pos)
+            foreach (var minion in minions.Where(x => ObjectManager.Player.GetSpellDamage(x, SpellSlot.Q) >= //FirstDamage = multitarget hit, differentiate! (check radius around mob predicted pos)
                                                       HealthPrediction.GetHealthPrediction(x, (int)(_spellQ.Delay * 1000))))
             {
                 CastQ(minion, _menu.Item("farmQPercent").GetValue<Slider>().Value);

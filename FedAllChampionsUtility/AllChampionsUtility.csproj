@@ -132,7 +132,6 @@
     <Compile Include="Champions\Support\Thresh.cs" />
     <Compile Include="Utilitys\Helper.cs" />
     <Compile Include="Champions\AdCarrys\Tristana.cs" />
-    <Compile Include="UcTargetSelector.cs" />
     <Compile Include="Champions\AdCarrys\Vayne.cs" />
     <Compile Include="Champions\MidLines\Xerath.cs" />
     <Compile Include="Champions\MidLines\Zed.cs" />

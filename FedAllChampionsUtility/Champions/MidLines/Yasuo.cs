@@ -158,7 +158,8 @@ namespace FedAllChampionsUtility
             var minions = MinionManager.GetMinions(ObjectManager.Player.ServerPosition, Q.Range + 50);
             foreach (var minion in minions.Where(minion => minion.IsValidTarget(Q.Range)))
             {
-                if (Player.Distance(minion) < Orbwalking.GetRealAutoAttackRange(minion) && minion.Health < DamageLib.CalcPhysicalMinionDmg((double)(Player.BaseAttackDamage + Player.FlatPhysicalDamageMod), (Obj_AI_Minion)minion, true))
+                var totalAD = Player.FlatPhysicalDamageMod + Player.BaseAttackDamage;
+                if (Player.Distance(minion) < Orbwalking.GetRealAutoAttackRange(minion) && minion.Health < Damage.CalcDamage(ObjectManager.Player, minion, Damage.DamageType.Physical, totalAD))
                     return;
                 if (Program.Menu.Item("useElh").GetValue<bool>() && minion.Health < ObjectManager.Player.GetSpellDamage(minion, SpellSlot.E))
                     useENormal(minion);
@@ -231,7 +232,7 @@ namespace FedAllChampionsUtility
                 foreach (var minion in minions.Where(minion => minion.IsValidTarget(Q.Range)))
                 {
                     if (minion.Health < ObjectManager.Player.GetSpellDamage(minion, SpellSlot.E)
-                        || ((minion.Health < (ObjectManager.Player.GetSpellDamage(minion, SpellSlot.E) + ObjectManager.Player.GetSpellDamage(minion, DamageLib.SpellType.AD) - 40))
+                        || ((minion.Health < (ObjectManager.Player.GetSpellDamage(minion, SpellSlot.E) + ObjectManager.Player.GetAutoAttackDamage(minion) - 40))
                         && (minion.Health > (ObjectManager.Player.GetSpellDamage(minion, SpellSlot.E) + 80))))
                     {
                         useENormal(minion);

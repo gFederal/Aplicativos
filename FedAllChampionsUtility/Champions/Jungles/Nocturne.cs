@@ -154,8 +154,8 @@ namespace FedAllChampionsUtility
                             }
                             break;
                         case 2:
-                            if ((enemy.Health - DamageLib.CalcMagicDmg(enemy.Health, enemy)) <
-                                        (enemy.Health - DamageLib.CalcMagicDmg(newtarget.Health, newtarget)))
+                            if ((enemy.Health - Damage.CalcDamage(ObjectManager.Player, enemy, Damage.DamageType.Magical, enemy.Health)) <
+                                        (enemy.Health - Damage.CalcDamage(ObjectManager.Player, newtarget, Damage.DamageType.Magical, newtarget.Health)))
                             {
                                 newtarget = enemy;
                             }
