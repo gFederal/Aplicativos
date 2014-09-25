@@ -22,6 +22,9 @@ namespace FedAllChampionsUtility
         public static int LastWToMouseT = 0;
         public static int UseSecondWT = 0;
         public static Vector2 PingLocation;
+
+        public static SpellSlot IgniteSlot;
+        public static Items.Item DFG;
         
         public Ziggs()
         {
@@ -55,6 +58,9 @@ namespace FedAllChampionsUtility
             W.SetSkillshot(0.25f, 275f, 1750f, false, SkillshotType.SkillshotCircle);
             E.SetSkillshot(0.5f, 100f, 1750f, false, SkillshotType.SkillshotCircle);
             R.SetSkillshot(1f, 550f, 1750f, false, SkillshotType.SkillshotCircle);
+
+            IgniteSlot = ObjectManager.Player.GetSpellSlot("SummonerDot");
+            DFG = Utility.Map.GetMap()._MapType == Utility.Map.MapType.TwistedTreeline ? new Items.Item(3188, 750) : new Items.Item(3128, 750);
 
             // Add to spell list
             SpellList.AddRange(new[] { Q1, Q2, Q3, W, E, R });
@@ -101,6 +107,15 @@ namespace FedAllChampionsUtility
             Program.Menu.SubMenu("Misc").AddItem(new MenuItem("ksAll", "KS: Everything").SetValue(false));
             Program.Menu.SubMenu("Misc").AddItem(new MenuItem("WToMouse", "W to mouse").SetValue(new KeyBind("Z".ToCharArray()[0], KeyBindType.Press)));
 
+            //Damage after combo:
+            var dmgAfterComboItem = new MenuItem("DamageAfterCombo", "Draw damage after combo").SetValue(true);
+            Utility.HpBarDamageIndicator.DamageToUnit = GetComboDamage;
+            Utility.HpBarDamageIndicator.Enabled = dmgAfterComboItem.GetValue<bool>();
+            dmgAfterComboItem.ValueChanged += delegate(object sender, OnValueChangeEventArgs eventArgs)
+            {
+                Utility.HpBarDamageIndicator.Enabled = eventArgs.GetNewValue<bool>();
+            };
+
             Program.Menu.AddSubMenu(new Menu("Drawing", "Drawing"));
             Program.Menu.SubMenu("Drawing").AddItem(new MenuItem("Draw_Disabled", "Disable All").SetValue(false));
             Program.Menu.SubMenu("Drawing").AddItem(new MenuItem("Draw_Q", "Draw Q").SetValue(true));
@@ -111,6 +126,7 @@ namespace FedAllChampionsUtility
             Program.Menu.SubMenu("Drawing").AddItem(new MenuItem("DrawRRangeM", "Draw R Range (Minimap)").SetValue(new Circle(false, Color.FromArgb(150, Color.DodgerBlue))));
             Program.Menu.SubMenu("Drawing").AddItem(new MenuItem("satchelDraw", "Draw satchel places").SetValue(new Circle(false, Color.FromArgb(150, Color.DodgerBlue))));
             Program.Menu.SubMenu("Drawing").AddItem(new MenuItem("satchelDrawdistance", "Don't draw circles distance >").SetValue<Slider>(new Slider(2000, 1, 10000)));
+            Program.Menu.SubMenu("Drawing").AddItem(dmgAfterComboItem);
         }
 
         private void Game_OnGameUpdate(EventArgs args)
@@ -167,6 +183,31 @@ namespace FedAllChampionsUtility
             {
                 W.Cast(ObjectManager.Player.ServerPosition, true);
             }
+        }
+
+        private float GetComboDamage(Obj_AI_Base enemy)
+        {
+            var damage = 0d;
+
+            if (Q1.IsReady())
+                damage += ObjectManager.Player.GetSpellDamage(enemy, SpellSlot.Q);
+
+            if (DFG.IsReady())
+                damage += ObjectManager.Player.GetItemDamage(enemy, Damage.DamageItems.Dfg) / 1.2;
+
+            if (W.IsReady())
+                damage += ObjectManager.Player.GetSpellDamage(enemy, SpellSlot.W);
+
+            if (E.IsReady())
+                damage += ObjectManager.Player.GetSpellDamage(enemy, SpellSlot.E);
+
+            if (IgniteSlot != SpellSlot.Unknown && ObjectManager.Player.SummonerSpellbook.CanUseSpell(IgniteSlot) == SpellState.Ready)
+                damage += ObjectManager.Player.GetSummonerSpellDamage(enemy, Damage.SummonerSpell.Ignite);
+
+            if (R.IsReady())
+                damage += Math.Min(7, ObjectManager.Player.Spellbook.GetSpell(SpellSlot.R).Ammo) * ObjectManager.Player.GetSpellDamage(enemy, SpellSlot.R, 1);
+
+            return (float)damage * (DFG.IsReady() ? 1.2f : 1);
         }
 
         private void AutoRKill()

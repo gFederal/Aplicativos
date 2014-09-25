@@ -16,7 +16,10 @@ namespace FedAllChampionsUtility
         public static Spell R;
         public static int UltTick;
 
-        private static Vector2 PingLocation;        
+        private static Vector2 PingLocation;
+
+        public static SpellSlot IgniteSlot;
+        public static Items.Item DFG;
 
         public Xerath()
         {
@@ -59,6 +62,15 @@ namespace FedAllChampionsUtility
             Program.Menu.SubMenu("Passive").AddItem(new MenuItem("useR_Killableping", "Ping if is killable").SetValue(true));
             Program.Menu.SubMenu("Passive").AddItem(new MenuItem("useR_warning", "warn if active").SetValue(false));
 
+            //Damage after combo:
+            var dmgAfterComboItem = new MenuItem("DamageAfterCombo", "Draw damage after combo").SetValue(true);
+            Utility.HpBarDamageIndicator.DamageToUnit = GetComboDamage;
+            Utility.HpBarDamageIndicator.Enabled = dmgAfterComboItem.GetValue<bool>();
+            dmgAfterComboItem.ValueChanged += delegate(object sender, OnValueChangeEventArgs eventArgs)
+            {
+                Utility.HpBarDamageIndicator.Enabled = eventArgs.GetNewValue<bool>();
+            };
+
             Program.Menu.AddSubMenu(new Menu("Drawing", "Drawing"));
             Program.Menu.SubMenu("Drawing").AddItem(new MenuItem("Draw_Disabled", "Disable All").SetValue(false));
             Program.Menu.SubMenu("Drawing").AddItem(new MenuItem("Draw_Q", "Draw Q").SetValue(true));
@@ -66,6 +78,7 @@ namespace FedAllChampionsUtility
             Program.Menu.SubMenu("Drawing").AddItem(new MenuItem("Draw_E", "Draw E").SetValue(true));
             Program.Menu.SubMenu("Drawing").AddItem(new MenuItem("Draw_R", "Draw R").SetValue(true));
             Program.Menu.SubMenu("Drawing").AddItem(new MenuItem("RRangeM", "R range (minimap)").SetValue(new Circle(false, Color.FromArgb(150, Color.DodgerBlue))));
+            Program.Menu.SubMenu("Drawing").AddItem(dmgAfterComboItem);
         }
 
         private void LoadSpells()
@@ -82,6 +95,9 @@ namespace FedAllChampionsUtility
 
             R = new Spell(SpellSlot.R, 675);
             R.SetSkillshot(0.7f, 120, float.MaxValue, false, SkillshotType.SkillshotCircle);
+
+            IgniteSlot = ObjectManager.Player.GetSpellSlot("SummonerDot");
+            DFG = Utility.Map.GetMap()._MapType == Utility.Map.MapType.TwistedTreeline ? new Items.Item(3188, 750) : new Items.Item(3128, 750);
         }
 
         private void Game_OnGameUpdate(EventArgs args)
@@ -112,6 +128,31 @@ namespace FedAllChampionsUtility
                         Cast_BasicCircleSkillshot_AOE_Farm(W);
                     break;
             }
+        }
+
+        private float GetComboDamage(Obj_AI_Base enemy)
+        {
+            var damage = 0d;
+
+            if (Q.IsReady())
+                damage += ObjectManager.Player.GetSpellDamage(enemy, SpellSlot.Q);
+
+            if (DFG.IsReady())
+                damage += ObjectManager.Player.GetItemDamage(enemy, Damage.DamageItems.Dfg) / 1.2;
+
+            if (W.IsReady())
+                damage += ObjectManager.Player.GetSpellDamage(enemy, SpellSlot.W);
+
+            if (E.IsReady())
+                damage += ObjectManager.Player.GetSpellDamage(enemy, SpellSlot.E);
+
+            if (IgniteSlot != SpellSlot.Unknown && ObjectManager.Player.SummonerSpellbook.CanUseSpell(IgniteSlot) == SpellState.Ready)
+                damage += ObjectManager.Player.GetSummonerSpellDamage(enemy, Damage.SummonerSpell.Ignite);
+
+            if (R.IsReady())
+                damage += Math.Min(7, ObjectManager.Player.Spellbook.GetSpell(SpellSlot.R).Ammo) * ObjectManager.Player.GetSpellDamage(enemy, SpellSlot.R, 1);
+
+            return (float)damage * (DFG.IsReady() ? 1.2f : 1);
         }
 
         private void R_Check()
