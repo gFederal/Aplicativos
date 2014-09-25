@@ -37,7 +37,7 @@ namespace FedAllChampionsUtility
             E = new Spell(SpellSlot.E, 900f);
             R = new Spell(SpellSlot.R, 25000f);
 
-            W.SetSkillshot(0.6f, 60f, 3300f, true, SkillshotType.SkillshotLine);
+            W.SetSkillshot(0.6f, 60f, 3000f, true, SkillshotType.SkillshotLine);
             E.SetSkillshot(0.7f, 120f, 1750f, false, SkillshotType.SkillshotCircle);
             R.SetSkillshot(0.6f, 140f, 1700f, false, SkillshotType.SkillshotLine);
         }
