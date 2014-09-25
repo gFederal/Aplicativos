@@ -160,10 +160,10 @@ namespace FedAllChampionsUtility
             {
                 if (Player.Distance(minion) < Orbwalking.GetRealAutoAttackRange(minion) && minion.Health < DamageLib.CalcPhysicalMinionDmg((double)(Player.BaseAttackDamage + Player.FlatPhysicalDamageMod), (Obj_AI_Minion)minion, true))
                     return;
-                if (Program.Menu.Item("useElh").GetValue<bool>() && minion.Health < DamageLib.getDmg(minion, DamageLib.SpellType.E))
+                if (Program.Menu.Item("useElh").GetValue<bool>() && minion.Health < ObjectManager.Player.GetSpellDamage(minion, SpellSlot.E))
                     useENormal(minion);
 
-                if (Program.Menu.Item("useQlh").GetValue<bool>() && !isQEmpovered() && minion.Health < DamageLib.getDmg(minion, DamageLib.SpellType.Q))
+                if (Program.Menu.Item("useQlh").GetValue<bool>() && !isQEmpovered() && minion.Health < ObjectManager.Player.GetSpellDamage(minion, SpellSlot.Q))
                     if (!(target != null && isQEmpovered() && Player.Distance(target) < 1050))
                     {
                         if (canCastFarQ())
@@ -230,9 +230,9 @@ namespace FedAllChampionsUtility
             if (Program.Menu.Item("useElc").GetValue<bool>())
                 foreach (var minion in minions.Where(minion => minion.IsValidTarget(Q.Range)))
                 {
-                    if (minion.Health < DamageLib.getDmg(minion, DamageLib.SpellType.E)
-                        || ((minion.Health < (DamageLib.getDmg(minion, DamageLib.SpellType.E) + DamageLib.getDmg(minion, DamageLib.SpellType.AD) - 40))
-                        && (minion.Health > (DamageLib.getDmg(minion, DamageLib.SpellType.E) + 80))))
+                    if (minion.Health < ObjectManager.Player.GetSpellDamage(minion, SpellSlot.E)
+                        || ((minion.Health < (ObjectManager.Player.GetSpellDamage(minion, SpellSlot.E) + ObjectManager.Player.GetSpellDamage(minion, DamageLib.SpellType.AD) - 40))
+                        && (minion.Health > (ObjectManager.Player.GetSpellDamage(minion, SpellSlot.E) + 80))))
                     {
                         useENormal(minion);
                         return;
@@ -490,7 +490,7 @@ namespace FedAllChampionsUtility
             List<Obj_AI_Hero> enemInAir = getKockUpEnemies();
             foreach (Obj_AI_Hero enem in enemInAir)
             {
-                if (enem.Health < DamageLib.getDmg(enem, DamageLib.SpellType.R) && R.IsReady())
+                if (enem.Health < ObjectManager.Player.GetSpellDamage(enem, SpellSlot.R) && R.IsReady())
                 {
                     R.Cast(enem);
                 }

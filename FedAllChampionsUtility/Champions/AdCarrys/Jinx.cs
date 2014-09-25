@@ -324,7 +324,7 @@ namespace FedAllChampionsUtility
 
             if (target.IsValidTarget())
             {
-                if (DamageLib.getDmg(target, DamageLib.SpellType.R, DamageLib.StageType.FirstDamage) > target.Health)
+                if (ObjectManager.Player.GetSpellDamage(target, SpellSlot.R, DamageLib.StageType.FirstDamage) > target.Health)
                 {
                     R.Cast(target, false, true);
                 }
@@ -344,16 +344,16 @@ namespace FedAllChampionsUtility
 
                 if (!checkRok)
                 {
-                    if (DamageLib.getDmg(t, DamageLib.SpellType.R, DamageLib.StageType.FirstDamage) > t.Health)
+                    if (ObjectManager.Player.GetSpellDamage(t, SpellSlot.R, DamageLib.StageType.FirstDamage) > t.Health)
                     {
                         if (R.Cast(t, false, true) == Spell.CastStates.SuccessfullyCasted) { }
                     }
                 }
                 else if (checkRok && distance > minR)
                 {
-                    var aDamage = DamageLib.getDmg(t, DamageLib.SpellType.AD);
-                    var wDamage = DamageLib.getDmg(t, DamageLib.SpellType.W, DamageLib.StageType.FirstDamage);
-                    var rDamage = DamageLib.getDmg(t, DamageLib.SpellType.R, DamageLib.StageType.FirstDamage);
+                    var aDamage = ObjectManager.Player.GetSpellDamage(t, DamageLib.SpellType.AD);
+                    var wDamage = ObjectManager.Player.GetSpellDamage(t, SpellSlot.W, DamageLib.StageType.FirstDamage);
+                    var rDamage = ObjectManager.Player.GetSpellDamage(t, SpellSlot.R, DamageLib.StageType.FirstDamage);
                     var powPowRange = GetRealPowPowRange(t);
 
                     if (distance < (powPowRange + QAddRange) && !(aDamage * 3.5 > t.Health))

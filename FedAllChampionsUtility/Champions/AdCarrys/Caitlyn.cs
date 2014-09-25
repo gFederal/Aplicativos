@@ -153,7 +153,7 @@ namespace FedAllChampionsUtility
             var qTarget = SimpleTs.GetTarget(Q.Range - 50, SimpleTs.DamageType.Physical);
             var eTarget = SimpleTs.GetTarget(E.Range - 50, SimpleTs.DamageType.Physical);
 
-            if (Program.Menu.Item("KillQ").GetValue<bool>() && Program.Menu.Item("KillEQ").GetValue<bool>() && Q.IsReady() && E.IsReady() && eTarget.Health < (DamageLib.getDmg(eTarget, DamageLib.SpellType.E) + DamageLib.getDmg(eTarget, DamageLib.SpellType.Q)) * 0.9)
+            if (Program.Menu.Item("KillQ").GetValue<bool>() && Program.Menu.Item("KillEQ").GetValue<bool>() && Q.IsReady() && E.IsReady() && eTarget.Health < (ObjectManager.Player.GetSpellDamage(eTarget, SpellSlot.E) + ObjectManager.Player.GetSpellDamage(eTarget, SpellSlot.Q)) * 0.9)
             {
                 PredictionOutput ePred = E.GetPrediction(eTarget);
                 if (ePred.Hitchance >= HitChance.High)
@@ -166,7 +166,7 @@ namespace FedAllChampionsUtility
             }
             else
             {
-                if (Program.Menu.Item("KillQ").GetValue<bool>() && Q.IsReady() && qTarget.Health < (DamageLib.getDmg(qTarget, DamageLib.SpellType.Q) * 0.9))
+                if (Program.Menu.Item("KillQ").GetValue<bool>() && Q.IsReady() && qTarget.Health < (ObjectManager.Player.GetSpellDamage(qTarget, SpellSlot.Q) * 0.9))
                 {
                     Vector3 predictedPos = Prediction.GetPrediction(qTarget, Q.Delay).UnitPosition;
                     Q.Speed = GetDynamicQSpeed(ObjectManager.Player.Distance(predictedPos));
@@ -174,7 +174,7 @@ namespace FedAllChampionsUtility
                 }
                 else
                 {
-                    if (Program.Menu.Item("KillEQ").GetValue<bool>() && !Q.IsReady() && E.IsReady() && eTarget.Health < (DamageLib.getDmg(qTarget, DamageLib.SpellType.Q) * 0.9))
+                    if (Program.Menu.Item("KillEQ").GetValue<bool>() && !Q.IsReady() && E.IsReady() && eTarget.Health < (ObjectManager.Player.GetSpellDamage(qTarget, SpellSlot.Q) * 0.9))
                     {
                         Vector3 predictedPos = Prediction.GetPrediction(qTarget, Q.Delay).UnitPosition;
                         Q.Speed = GetDynamicQSpeed(ObjectManager.Player.Distance(predictedPos));
@@ -188,7 +188,7 @@ namespace FedAllChampionsUtility
         {
             var rTarget = SimpleTs.GetTarget(GetRRange()-100, SimpleTs.DamageType.Physical);
 
-            if (R.IsReady() && rTarget != null && rTarget.Health < DamageLib.getDmg(rTarget, DamageLib.SpellType.R) * 0.9) 
+            if (R.IsReady() && rTarget != null && rTarget.Health < ObjectManager.Player.GetSpellDamage(rTarget, SpellSlot.R) * 0.9) 
             {
                 if (ObjectManager.Player.Distance(rTarget) > Q.Range)
                 R.CastOnUnit(rTarget);
@@ -273,7 +273,7 @@ namespace FedAllChampionsUtility
             var victims = "";
 
             foreach (var target in Program.Helper.EnemyInfo.Where(x =>
-             x.Player.IsVisible && x.Player.IsValidTarget(R.Range) && !x.Player.IsDead && DamageLib.getDmg(x.Player, DamageLib.SpellType.R) * 0.9 >= x.Player.Health))
+             x.Player.IsVisible && x.Player.IsValidTarget(R.Range) && !x.Player.IsDead && ObjectManager.Player.GetSpellDamage(x.Player, SpellSlot.R) * 0.9 >= x.Player.Health))
             {
                 victims += target.Player.ChampionName + " ";
 

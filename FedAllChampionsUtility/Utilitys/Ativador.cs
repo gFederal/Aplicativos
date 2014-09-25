@@ -467,7 +467,7 @@ namespace FedAllChampionsUtility
                     return;
                 const int range = 600;
                 if (Program.Menu.Item("useDot1").GetValue<bool>())
-                    foreach (var enemy in Program.Helper.EnemyTeam.Where(hero => hero.IsValidTarget(range) && DamageLib.getDmg(hero, DamageLib.SpellType.IGNITE) >= hero.Health))
+                    foreach (var enemy in Program.Helper.EnemyTeam.Where(hero => hero.IsValidTarget(range) && ObjectManager.Player.GetSummonerSpellDamage(hero, Damage.SummonerSpell.Ignite) >= hero.Health))
                     {
                         ObjectManager.Player.SummonerSpellbook.CastSpell(Dot, enemy);
                         return;

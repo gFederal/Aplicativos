@@ -197,7 +197,7 @@ namespace FedAllChampionsUtility
                             () =>
                             {
                                 if (R.IsReady() &&
-                                    !(DamageLib.getDmg(target, DamageLib.SpellType.R) * 0.6 > target.Health))
+                                    !(ObjectManager.Player.GetSpellDamage(target, SpellSlot.R) * 0.6 > target.Health))
                                 {
                                     R.Cast(target, false, true);
                                 }
@@ -213,7 +213,7 @@ namespace FedAllChampionsUtility
                     Utility.DelayAction.Add(
                         650 - 100 - Game.Ping / 2, () =>
                         {
-                            if (R.IsReady() && !(DamageLib.getDmg(target, DamageLib.SpellType.R) * 0.6 > target.Health))
+                            if (R.IsReady() && !(ObjectManager.Player.GetSpellDamage(target, SpellSlot.R) * 0.6 > target.Health))
                             {
                                 R.Cast(target, false, true);
                             }
@@ -244,7 +244,7 @@ namespace FedAllChampionsUtility
                             W.Cast(flashRtarget, false, true);
                         }
                     }
-                    else if (R.IsReady() && !(DamageLib.getDmg(target, DamageLib.SpellType.R) * 0.6 > target.Health))
+                    else if (R.IsReady() && !(ObjectManager.Player.GetSpellDamage(target, SpellSlot.R) * 0.6 > target.Health))
                     {
                         R.Cast(target, false, true);
                     }
@@ -302,7 +302,7 @@ namespace FedAllChampionsUtility
                     minions.OrderByDescending(Minions => Minions.MaxHealth)
                         .Where(minion => minion.IsValidTarget(Q.Range))
                 let predictedHealth = Q.GetHealthPrediction(minion)
-                where predictedHealth < DamageLib.getDmg(minion, DamageLib.SpellType.Q) * 0.9 && predictedHealth > 0
+                where predictedHealth < ObjectManager.Player.GetSpellDamage(minion, SpellSlot.Q) * 0.9 && predictedHealth > 0
                 select minion)
             {
                 Q.CastOnUnit(minion, Packets());

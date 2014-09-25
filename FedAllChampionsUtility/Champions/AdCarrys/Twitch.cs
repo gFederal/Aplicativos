@@ -158,7 +158,7 @@ namespace FedAllChampionsUtility
                 ExpungeBuffStacks = (from buff in eTarget.Buffs
                                      where buff.DisplayName.ToLower() == "twitchdeadlyvenom"
                                      select buff.Count).FirstOrDefault();
-            if (!eTarget.IsMinion && (ExpungeBuffStacks >= eStacks || (AutoEKS && eTarget.HasBuff("TwitchDeadlyVenom") && eTarget.Health < DamageLib.getDmg(eTarget, DamageLib.SpellType.E) - 15)))
+            if (!eTarget.IsMinion && (ExpungeBuffStacks >= eStacks || (AutoEKS && eTarget.HasBuff("TwitchDeadlyVenom") && eTarget.Health < ObjectManager.Player.GetSpellDamage(eTarget, SpellSlot.E) - 15)))
                 E.Cast();
         }
 

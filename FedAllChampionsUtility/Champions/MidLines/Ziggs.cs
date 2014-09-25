@@ -178,17 +178,17 @@ namespace FedAllChampionsUtility
             var eTarget = SimpleTs.GetTarget(E.Range + W.Width * 0.5f, SimpleTs.DamageType.Magical);
 
             var ksAll = Program.Menu.Item("ksAll").GetValue<bool>();
-            if (Q1.IsReady() && qTarget3 != null && qTarget3.Health < DamageLib.getDmg(qTarget3, DamageLib.SpellType.Q) && ksAll)
+            if (Q1.IsReady() && qTarget3 != null && qTarget3.Health < ObjectManager.Player.GetSpellDamage(qTarget3, SpellSlot.Q) && ksAll)
             {
                 CastQ();
             }
-            else if (R.IsReady() && rTarget != null && rTarget.Health < DamageLib.getDmg(rTarget, DamageLib.SpellType.R) * 0.9)
+            else if (R.IsReady() && rTarget != null && rTarget.Health < ObjectManager.Player.GetSpellDamage(rTarget, SpellSlot.R) * 0.9)
             {
                 PredictionOutput rPred = R.GetPrediction(rTarget);
                 if (rPred.Hitchance >= HitChance.High)
                     R.Cast(rTarget, true, true);
             }
-            else if (Q1.IsReady() && qTarget != null && qTarget.Health < (DamageLib.getDmg(qTarget, DamageLib.SpellType.Q) + DamageLib.getDmg(rTarget, DamageLib.SpellType.R) * 0.9) && ksAll)
+            else if (Q1.IsReady() && qTarget != null && qTarget.Health < (ObjectManager.Player.GetSpellDamage(qTarget, SpellSlot.Q) + ObjectManager.Player.GetSpellDamage(rTarget, SpellSlot.R) * 0.9) && ksAll)
             {
                 CastQ();
                 PredictionOutput rPred = R.GetPrediction(rTarget);
@@ -331,7 +331,7 @@ namespace FedAllChampionsUtility
             var victims = "";
 
             foreach (var target in Program.Helper.EnemyInfo.Where(x =>
-             x.Player.IsVisible && x.Player.IsValidTarget(R.Range) && !x.Player.IsDead && DamageLib.getDmg(x.Player, DamageLib.SpellType.R) * 0.9 >= x.Player.Health))
+             x.Player.IsVisible && x.Player.IsValidTarget(R.Range) && !x.Player.IsDead && ObjectManager.Player.GetSpellDamage(x.Player, SpellSlot.R) * 0.9 >= x.Player.Health))
             {
                 victims += target.Player.ChampionName + " ";
 
@@ -584,7 +584,7 @@ namespace FedAllChampionsUtility
                     {
                         if (!Orbwalking.InAutoAttackRange(minion))
                         {
-                            var Qdamage = DamageLib.getDmg(minion, DamageLib.SpellType.Q) * 0.75;
+                            var Qdamage = ObjectManager.Player.GetSpellDamage(minion, SpellSlot.Q) * 0.75;
 
                             if (Qdamage > Q1.GetHealthPrediction(minion))
                             {

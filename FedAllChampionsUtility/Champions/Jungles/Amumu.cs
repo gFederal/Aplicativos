@@ -96,7 +96,7 @@ namespace FedAllChampionsUtility
                     {
                         enemiesHit++;
 
-                        if (DamageLib.getDmg(enemy, DamageLib.SpellType.R) >= enemy.Health)
+                        if (ObjectManager.Player.GetSpellDamage(enemy, SpellSlot.R) >= enemy.Health)
                             killableHits++;
                     }
                 }

@@ -50,7 +50,7 @@ namespace FedAllChampionsUtility
             var dmgAfterComboItem = new MenuItem("DamageAfterCombo", "Draw Combo Damage").SetValue(true); //copied from esk0r Syndra
             drawMenu.AddItem(dmgAfterComboItem);
 
-            _itemDFG = Utility.Map.GetMap() == Utility.Map.MapType.TwistedTreeline ? new Items.Item(3188, 750) : new Items.Item(3128, 750);
+            _itemDFG = Utility.Map.GetMap()._MapType == Utility.Map.MapType.TwistedTreeline ? new Items.Item(3188, 750) : new Items.Item(3128, 750);
 
             _spellQ = new Spell(SpellSlot.Q, 990);
             _spellW = new Spell(SpellSlot.W, 795 - 95);
@@ -184,36 +184,30 @@ namespace FedAllChampionsUtility
             if (_menu.Item("comboR").GetValue<bool>() && _spellR.IsReady())
                 if (OkToUlt())
                     _spellR.Cast(Game.CursorPos, Packets());
-        }
+        }       
 
-        List<Tuple<DamageLib.SpellType, DamageLib.StageType>> GetSpellCombo()
+        float GetComboDamage(Obj_AI_Base enemy)
         {
-            var spellCombo = new List<Tuple<DamageLib.SpellType, DamageLib.StageType>>();
+            var damage = 0d;
 
             if (_spellQ.IsReady())
-                spellCombo.Add(Tuple.Create(DamageLib.SpellType.Q, DamageLib.StageType.Default));
-
-            if (_spellW.IsReady())
-                spellCombo.Add(Tuple.Create(DamageLib.SpellType.W, DamageLib.StageType.FirstDamage));
-
-            if (_spellE.IsReady())
-                spellCombo.Add(Tuple.Create(DamageLib.SpellType.E, DamageLib.StageType.Default));
-
-            if (_spellR.IsReady())
-                spellCombo.Add(Tuple.Create(DamageLib.SpellType.R, DamageLib.StageType.FirstDamage));
-
-            return spellCombo;
-        }
-
-        float GetComboDamage(Obj_AI_Base target)
-        {
-            double comboDamage = (float)DamageLib.GetComboDamage(target, GetSpellCombo());
+                damage += ObjectManager.Player.GetSpellDamage(enemy, SpellSlot.Q);
 
             if (_itemDFG.IsReady())
-                comboDamage = comboDamage * 1.2 + DamageLib.getDmg(target, DamageLib.SpellType.DFG);
+                damage += ObjectManager.Player.GetItemDamage(enemy, Damage.DamageItems.Dfg) / 1.2;
 
-            return (float)(comboDamage + DamageLib.getDmg(target, DamageLib.SpellType.AD));
+            if (_spellW.IsReady())
+                damage += ObjectManager.Player.GetSpellDamage(enemy, SpellSlot.W);
+
+            if (_spellE.IsReady())
+                damage += ObjectManager.Player.GetSpellDamage(enemy, SpellSlot.E);            
+
+            if (_spellR.IsReady())
+                damage += Math.Min(7, ObjectManager.Player.Spellbook.GetSpell(SpellSlot.R).Ammo) * ObjectManager.Player.GetSpellDamage(enemy, SpellSlot.R, 1);
+
+            return (float)damage * (_itemDFG.IsReady() ? 1.2f : 1);
         }
+       
 
         bool OkToUlt()
         {

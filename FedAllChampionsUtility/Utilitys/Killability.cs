@@ -141,19 +141,19 @@ namespace FedAllChampionsUtility
                 switch (spell.Slot)
                 {
                     case SpellSlot.Q: combo.Add(new Tuple<DamageLib.SpellType, DamageLib.StageType>(
-                        DamageLib.SpellType.Q,
+                        SpellSlot.Q,
                         DamageLib.StageType.Default)); break;
 
                     case SpellSlot.W: combo.Add(new Tuple<DamageLib.SpellType, DamageLib.StageType>(
-                        DamageLib.SpellType.W,
+                        SpellSlot.W,
                         DamageLib.StageType.Default)); break;
 
                     case SpellSlot.E: combo.Add(new Tuple<DamageLib.SpellType, DamageLib.StageType>(
-                        DamageLib.SpellType.E,
+                        SpellSlot.E,
                         DamageLib.StageType.Default)); break;
 
                     case SpellSlot.R: combo.Add(new Tuple<DamageLib.SpellType, DamageLib.StageType>(
-                        DamageLib.SpellType.R,
+                        SpellSlot.R,
                         DamageLib.StageType.Default)); break;
                 }
 
