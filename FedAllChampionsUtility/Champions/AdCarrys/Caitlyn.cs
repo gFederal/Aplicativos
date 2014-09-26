@@ -59,6 +59,7 @@ namespace FedAllChampionsUtility
 
             Program.Menu.AddSubMenu(new Menu("Trap", "Trap"));
             Program.Menu.SubMenu("Trap").AddItem(new MenuItem("autoccW", "AutoTrap on CC").SetValue(true));
+            Program.Menu.SubMenu("Trap").AddItem(new MenuItem("autotpW", "AutoTrap on TP").SetValue(true));
             Program.Menu.SubMenu("Trap").AddItem(new MenuItem("AGCtrap", "AntiGapClose with W").SetValue(true));
             Program.Menu.SubMenu("Trap").AddItem(new MenuItem("casttrap", "Trap on Closest Enemy - ToDo").SetValue(new KeyBind("G".ToCharArray()[0], KeyBindType.Press)));
 
@@ -94,6 +95,11 @@ namespace FedAllChampionsUtility
             if (Program.Menu.Item("autoccW").GetValue<bool>() || Program.Menu.Item("autoccQ").GetValue<bool>())
             {
                 AutoCC();
+            }
+
+            if (Program.Menu.Item("autotpW").GetValue<bool>())
+            {
+                TrapTP();
             }
 
             if (Program.Menu.Item("PeelE").GetValue<bool>())
@@ -235,6 +241,15 @@ namespace FedAllChampionsUtility
                 }
             }
             return enemBuffs;
+        }
+
+        private void TrapTP()
+        {
+            if (ObjectManager.Player.Spellbook.CanUseSpell(SpellSlot.W) != SpellState.Ready)
+                return;
+
+            foreach (var Object in ObjectManager.Get<Obj_AI_Base>().Where(Obj => Obj.Distance(ObjectManager.Player) < 800f && Obj.Team != ObjectManager.Player.Team && Obj.HasBuff("teleport_target", true)))
+                ObjectManager.Player.Spellbook.CastSpell(SpellSlot.W, Object.Position);
         }
 
         private void Drawing_OnEndScene(EventArgs args)

@@ -128,6 +128,14 @@ namespace FedAllChampionsUtility
                         Cast_BasicCircleSkillshot_AOE_Farm(W);
                     break;
             }
+
+            if (R.IsReady() && Program.Menu.Item("useR_Killableping").GetValue<bool>())
+            {
+                foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(h => h.IsValidTarget(GetRRange()) && (float)ObjectManager.Player.GetSpellDamage(h, SpellSlot.R) * 3 > h.Health))
+                {
+                    Ping(enemy.Position.To2D());
+                }
+            }
         }
 
         private float GetComboDamage(Obj_AI_Base enemy)
@@ -292,17 +300,7 @@ namespace FedAllChampionsUtility
             foreach (var target in Program.Helper.EnemyInfo.Where(x =>
              x.Player.IsVisible && x.Player.IsValidTarget(GetRRange()) && (((float)ObjectManager.Player.GetSpellDamage(x.Player, SpellSlot.R) * 3) * 0.9) >= x.Player.Health))
             {
-                victims += target.Player.ChampionName + " ";
-
-                if (!R.IsReady() || !Program.Menu.Item("useR_Killableping").GetValue<bool>() ||
-                    (target.LastPinged != 0 && Environment.TickCount - target.LastPinged <= 11000))
-                    continue;
-                if (!(ObjectManager.Player.Distance(target.Player) > 1800) ||
-                    (!target.Player.IsVisible))
-                    continue;
-
-                Ping(target.Player.Position.To2D());
-                target.LastPinged = Environment.TickCount;
+                victims += target.Player.ChampionName + " ";                
             }
             if (victims != "" && Program.Menu.Item("useR_Killabletext").GetValue<bool>())
                 if (!Program.Menu.Item("useR_KS").GetValue<KeyBind>().Active && R.IsReady())
