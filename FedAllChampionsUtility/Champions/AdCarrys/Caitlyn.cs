@@ -287,8 +287,11 @@ namespace FedAllChampionsUtility
         private void TesteBuff()
         {
             foreach (var Object in ObjectManager.Get<Obj_AI_Base>().Where(Obj => Obj.Distance(ObjectManager.Player) < 25000f && !Obj.HasBuff("", true)))
+            {
 
-                Game.PrintChat(Object.Buffs.ToString() + " - " + Object.Name);         
+                if (Object.Name.Contains("Turret") || Object.Name.Contains("Minion")) return;
+                Game.PrintChat(Object.Buffs.ToString() + " - " + Object.Name);
+            }
                     
         }
 
