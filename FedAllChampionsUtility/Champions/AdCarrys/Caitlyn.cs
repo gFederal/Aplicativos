@@ -17,7 +17,7 @@ namespace FedAllChampionsUtility
     {
         public static Spell Q, W, E, R;        
         public static Vector2 PingLocation;
-        public static int LastPingT = 0;
+        public static int LastPingT = 0;        
 
         const float _spellQSpeed = 2500;
         const float _spellQSpeedMin = 400;
@@ -179,6 +179,15 @@ namespace FedAllChampionsUtility
             }
         }
 
+        private void CastQComboEQ()
+        {
+            if (ObjectManager.Player.Spellbook.CanUseSpell(SpellSlot.Q) != SpellState.Ready)
+                return;
+
+            foreach (var Object in ObjectManager.Get<Obj_AI_Base>().Where(Obj => Obj.Distance(ObjectManager.Player) < Q.Range && Obj.Team != ObjectManager.Player.Team && Obj.HasBuff("CaitlynEntrapment", true)))
+                ObjectManager.Player.Spellbook.CastSpell(SpellSlot.Q, Object.Position);
+        }
+
         float GetDynamicQSpeed(float distance)
         {
             float accelerationrate = Q.Range / (_spellQSpeedMin - _spellQSpeed); // = -0.476...
@@ -279,7 +288,7 @@ namespace FedAllChampionsUtility
             if (ObjectManager.Player.Spellbook.CanUseSpell(SpellSlot.W) != SpellState.Ready)
                 return;
 
-            foreach (var Object in ObjectManager.Get<Obj_AI_Base>().Where(Obj => Obj.Distance(ObjectManager.Player) < 800f && Obj.Team != ObjectManager.Player.Team && Obj.HasBuff("teleport_target", true)))
+            foreach (var Object in ObjectManager.Get<Obj_AI_Base>().Where(Obj => Obj.Distance(ObjectManager.Player) < 800f && Obj.Team != ObjectManager.Player.Team && (Obj.HasBuff("teleport_target", true) ||Obj.HasBuff("Destiny", true))))
                 ObjectManager.Player.Spellbook.CastSpell(SpellSlot.W, Object.Position);
         }        
 
