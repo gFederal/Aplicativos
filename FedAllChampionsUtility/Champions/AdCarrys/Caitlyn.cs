@@ -86,8 +86,7 @@ namespace FedAllChampionsUtility
                         
         }
         private void Game_OnGameUpdate(EventArgs args)
-        {
-            TesteBuff();
+        {            
 
             if (ObjectManager.Player.IsDead) return;
 
@@ -282,18 +281,7 @@ namespace FedAllChampionsUtility
 
             foreach (var Object in ObjectManager.Get<Obj_AI_Base>().Where(Obj => Obj.Distance(ObjectManager.Player) < 800f && Obj.Team != ObjectManager.Player.Team && Obj.HasBuff("teleport_target", true)))
                 ObjectManager.Player.Spellbook.CastSpell(SpellSlot.W, Object.Position);
-        }
-
-        private void TesteBuff()
-        {
-            foreach (var Object in ObjectManager.Get<Obj_AI_Base>().Where(Obj => Obj.Distance(ObjectManager.Player) < 25000f && !Obj.HasBuff("", true)))
-            {
-
-                if (Object.Name.Contains("Turret") || Object.Name.Contains("Minion")) return;
-                Game.PrintChat(Object.Buffs.ToString() + " - " + Object.Name);
-            }
-                    
-        }
+        }        
 
         private void Drawing_OnEndScene(EventArgs args)
         {
