@@ -69,6 +69,7 @@ namespace FedAllChampionsUtility
             Program.Menu.SubMenu("90 Caliber").AddItem(new MenuItem("KillEQ", "Auto E-Q Kill").SetValue(true));
             Program.Menu.SubMenu("90 Caliber").AddItem(new MenuItem("UseEQC", "Use E-Q Combo").SetValue(new KeyBind("Z".ToCharArray()[0], KeyBindType.Press)));
             Program.Menu.SubMenu("90 Caliber").AddItem(new MenuItem("PeelE", "Use E defensively").SetValue(true));
+            Program.Menu.SubMenu("90 Caliber").AddItem(new MenuItem("JumpE", "Jump to Mouse").SetValue(new KeyBind("G".ToCharArray()[0], KeyBindType.Press)));
 
             Program.Menu.AddSubMenu(new Menu("Ace Hole", "Ace Hole"));
             Program.Menu.SubMenu("Ace Hole").AddItem(new MenuItem("rKill", "R Killshot").SetValue(new KeyBind("R".ToCharArray()[0], KeyBindType.Press)));
@@ -108,7 +109,12 @@ namespace FedAllChampionsUtility
                 PeelE();
             }
 
-            if (Program.Menu.Item("UseEQC").GetValue<KeyBind>().Active && E.IsReady() && Q.IsReady())
+            if (Program.Menu.Item("JumpE").GetValue<KeyBind>().Active)
+            {
+                JumptoMouse();
+            }
+
+            if (Program.Menu.Item("UseEQC").GetValue<KeyBind>().Active)
             {
                 ComboEQ();
             }
@@ -144,16 +150,31 @@ namespace FedAllChampionsUtility
             }
         }
 
+        private void JumptoMouse()
+        {            
+            if (E.IsReady())
+            {
+                var pos = ObjectManager.Player.ServerPosition.To2D().Extend(Game.CursorPos.To2D(), -300).To3D();
+                W.Cast(pos, true);                
+            }
+        }
+
         private void ComboEQ()
         {
             var vTarget = SimpleTs.GetTarget(E.Range - 50, SimpleTs.DamageType.Physical);            
 
             if (vTarget.IsValidTarget(E.Range))
             {
-                E.Cast(vTarget);
-                Vector3 predictedPos = Prediction.GetPrediction(vTarget, Q.Delay).UnitPosition;
-                Q.Speed = GetDynamicQSpeed(ObjectManager.Player.Distance(predictedPos));
-                Q.CastIfHitchanceEquals(vTarget, HitChance.High, Packets());                    
+                if (E.IsReady() && Q.IsReady())
+                {
+                    E.Cast(vTarget);
+                }
+                if (!E.IsReady() && Q.IsReady())
+                {
+                    Vector3 predictedPos = Prediction.GetPrediction(vTarget, Q.Delay).UnitPosition;
+                    Q.Speed = GetDynamicQSpeed(ObjectManager.Player.Distance(predictedPos));
+                    Q.CastIfHitchanceEquals(vTarget, HitChance.High, Packets());
+                }
             }
         }
 
