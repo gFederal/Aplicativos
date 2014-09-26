@@ -115,7 +115,15 @@ namespace FedAllChampionsUtility
             if (Program.Menu.Item("KillQ").GetValue<bool>() || Program.Menu.Item("KillEQ").GetValue<bool>())
             {
                 Killer();
-            }            
+            }
+
+            if (R.IsReady() && Program.Menu.Item("pingkillable").GetValue<bool>())
+            {
+                foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(h => h.IsValidTarget(GetRRange()) && (float)ObjectManager.Player.GetSpellDamage(h, SpellSlot.R) * 0.9 > h.Health))
+                {
+                    Ping(enemy.Position.To2D());
+                }
+            }
         }
 
         private float GetRRange()
@@ -290,19 +298,8 @@ namespace FedAllChampionsUtility
             foreach (var target in Program.Helper.EnemyInfo.Where(x =>
              x.Player.IsVisible && x.Player.IsValidTarget(R.Range) && !x.Player.IsDead && ObjectManager.Player.GetSpellDamage(x.Player, SpellSlot.R) * 0.9 >= x.Player.Health))
             {
-                victims += target.Player.ChampionName + " ";
-
-                if (!R.IsReady() || !Program.Menu.Item("pingkillable").GetValue<bool>() ||
-                    (target.LastPinged != 0 && Environment.TickCount - target.LastPinged <= 9000))
-                    continue;
-                if (!(ObjectManager.Player.Distance(target.Player) < GetRRange()) || !(ObjectManager.Player.Distance(target.Player) > 1200) ||
-                    (!target.Player.IsVisible))
-                    continue;
-
-                Ping(target.Player.Position.To2D());
-                target.LastPinged = Environment.TickCount;
-            }
-            
+                victims += target.Player.ChampionName + " ";                                
+            }            
         }
 
         private void Ping(Vector2 position)
