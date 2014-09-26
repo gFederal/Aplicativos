@@ -155,7 +155,7 @@ namespace FedAllChampionsUtility
             if (E.IsReady())
             {
                 var pos = ObjectManager.Player.ServerPosition.To2D().Extend(Game.CursorPos.To2D(), -300).To3D();
-                W.Cast(pos, true);                
+                E.Cast(pos, true);                
             }
         }
 
