@@ -17,6 +17,7 @@ namespace FedAllChampionsUtility
     {
         public static Spell Q, W, E, R;        
         public static Vector2 PingLocation;
+        public static int LastPingT = 0;
 
         const float _spellQSpeed = 2500;
         const float _spellQSpeedMin = 400;
@@ -304,13 +305,15 @@ namespace FedAllChampionsUtility
 
         private void Ping(Vector2 position)
         {
+            if (Environment.TickCount - LastPingT < 30 * 1000) return;
+            LastPingT = Environment.TickCount;
             PingLocation = position;
             SimplePing();
             Utility.DelayAction.Add(150, SimplePing);
             Utility.DelayAction.Add(300, SimplePing);
             Utility.DelayAction.Add(400, SimplePing);
             Utility.DelayAction.Add(800, SimplePing);
-        }
+        }        
 
         private void SimplePing()
         {
