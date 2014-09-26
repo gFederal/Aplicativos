@@ -16,7 +16,8 @@ namespace FedAllChampionsUtility
         public static Spell R;
         public static int UltTick;
 
-        private static Vector2 PingLocation;
+        public static Vector2 PingLocation;
+        public static int LastPingT = 0;
 
         public static SpellSlot IgniteSlot;
         public static Items.Item DFG;
@@ -259,15 +260,17 @@ namespace FedAllChampionsUtility
             return Environment.TickCount - UltTick < 250 || ObjectManager.Player.HasBuff("XerathLocusOfPower2");
         }
 
-        private static void Ping(Vector2 position)
-        {            
+        private void Ping(Vector2 position)
+        {
+            if (Environment.TickCount - LastPingT < 30 * 1000) return;
+            LastPingT = Environment.TickCount;
             PingLocation = position;
             SimplePing();
             Utility.DelayAction.Add(150, SimplePing);
             Utility.DelayAction.Add(300, SimplePing);
             Utility.DelayAction.Add(400, SimplePing);
             Utility.DelayAction.Add(800, SimplePing);
-        }
+        }  
 
         private static void SimplePing()
         {
