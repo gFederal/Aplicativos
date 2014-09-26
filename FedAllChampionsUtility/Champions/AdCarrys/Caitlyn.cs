@@ -31,7 +31,7 @@ namespace FedAllChampionsUtility
             Game.OnGameUpdate += Game_OnGameUpdate;
             Drawing.OnDraw += Drawing_OnDraw;
             Drawing.OnEndScene += Drawing_OnEndScene;
-            AntiGapcloser.OnEnemyGapcloser += AntiGapcloser_OnEnemyGapcloser;
+            AntiGapcloser.OnEnemyGapcloser += AntiGapcloser_OnEnemyGapcloser;            
 
             PluginLoaded();
 
@@ -87,6 +87,8 @@ namespace FedAllChampionsUtility
         }
         private void Game_OnGameUpdate(EventArgs args)
         {
+            TesteBuff();
+
             if (ObjectManager.Player.IsDead) return;
 
             if (Program.Menu.Item("rKill").GetValue<KeyBind>().Active || Program.Menu.Item("AutoRKill").GetValue<bool>())
@@ -282,6 +284,14 @@ namespace FedAllChampionsUtility
                 ObjectManager.Player.Spellbook.CastSpell(SpellSlot.W, Object.Position);
         }
 
+        private void TesteBuff()
+        {
+            foreach (var Object in ObjectManager.Get<Obj_AI_Base>().Where(Obj => Obj.Distance(ObjectManager.Player) < 25000f && !Obj.HasBuff("", true)))
+
+                Game.PrintChat(Object.Buffs.ToString() + " - " + Object.Name);         
+                    
+        }
+
         private void Drawing_OnEndScene(EventArgs args)
         {
             if (Program.Menu.Item("Draw_Disabled").GetValue<bool>())
@@ -345,7 +355,16 @@ namespace FedAllChampionsUtility
         {
             if (E.IsReady() && gapcloser.Sender.IsValidTarget(E.Range))
                 E.Cast(gapcloser.Sender);
-        }       
+        }
+
+        private void OnCreateObject(Obj_AI_Base sender, EventArgs args)
+        {
+            if (sender.Name.Contains("missile") || sender.Name.Contains("Minion")) return;
+
+            Game.PrintChat(sender.Name + " - " + sender.Buffs);
+
+
+        }
 
     }
 }
