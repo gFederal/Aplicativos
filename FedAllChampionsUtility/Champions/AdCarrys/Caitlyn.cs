@@ -17,7 +17,8 @@ namespace FedAllChampionsUtility
     {
         public static Spell Q, W, E, R;        
         public static Vector2 PingLocation;
-        public static int LastPingT = 0;        
+        public static int LastPingT = 0;
+        public static int EQComboT = 0;
 
         const float _spellQSpeed = 2500;
         const float _spellQSpeedMin = 400;
@@ -32,8 +33,8 @@ namespace FedAllChampionsUtility
             Drawing.OnDraw += Drawing_OnDraw;
             Drawing.OnEndScene += Drawing_OnEndScene;
             AntiGapcloser.OnEnemyGapcloser += AntiGapcloser_OnEnemyGapcloser;
-
-            GameObject.OnCreate += GO_OnCreate;
+            Obj_AI_Base.OnProcessSpellCast += Obj_AI_Hero_OnProcessSpellCast;
+            GameObject.OnCreate += Trap_OnCreate;
 
             PluginLoaded();
 
@@ -43,13 +44,12 @@ namespace FedAllChampionsUtility
         {
             Q = new Spell(SpellSlot.Q, 1300);
             W = new Spell(SpellSlot.W, 800);
-            E = new Spell(SpellSlot.E, 950);
+            E = new Spell(SpellSlot.E, 950);           
             R = new Spell(SpellSlot.R, 2000);
 
             Q.SetSkillshot(0.5f, 90f, 2200f, false, SkillshotType.SkillshotLine);
             W.SetSkillshot(0.25f, 80f, 2000f, false, SkillshotType.SkillshotCircle);
-            E.SetSkillshot(0.25f, 80f, 1600f, true, SkillshotType.SkillshotLine);
-            
+            E.SetSkillshot(0.25f, 80f, 1600f, true, SkillshotType.SkillshotLine); 
         }
 
         private void LoadMenu()
@@ -100,12 +100,7 @@ namespace FedAllChampionsUtility
             if (Program.Menu.Item("autoccW").GetValue<bool>() || Program.Menu.Item("autoccQ").GetValue<bool>())
             {
                 AutoCC();
-            }
-
-            if (Program.Menu.Item("autotpW").GetValue<bool>())
-            {
-                TrapTP();
-            }
+            }            
 
             if (Program.Menu.Item("PeelE").GetValue<bool>())
             {
@@ -120,7 +115,7 @@ namespace FedAllChampionsUtility
             if (Program.Menu.Item("UseEQC").GetValue<KeyBind>().Active)
             {
                 ComboEQ();
-            }
+            }                 
 
             if (Program.Menu.Item("KillQ").GetValue<bool>() || Program.Menu.Item("KillEQ").GetValue<bool>())
             {
@@ -164,31 +159,18 @@ namespace FedAllChampionsUtility
 
         private void ComboEQ()
         {
-            var vTarget = SimpleTs.GetTarget(E.Range - 50, SimpleTs.DamageType.Physical);            
+            var vTarget = SimpleTs.GetTarget(E.Range - 50, SimpleTs.DamageType.Physical);
 
-            if (vTarget.IsValidTarget(E.Range))
+            if (vTarget.IsValidTarget(E.Range) && E.IsReady() && Q.IsReady())
             {
-                if (E.IsReady() && Q.IsReady())
+                var prediction = E.GetPrediction(vTarget);
+                if (prediction.Hitchance >= HitChance.High)
                 {
-                    E.Cast(vTarget);
-                }
-                if (!E.IsReady() && Q.IsReady())
-                {
-                    Vector3 predictedPos = Prediction.GetPrediction(vTarget, Q.Delay).UnitPosition;
-                    Q.Speed = GetDynamicQSpeed(ObjectManager.Player.Distance(predictedPos));
-                    Q.CastIfHitchanceEquals(vTarget, HitChance.High, Packets());
+                    E.Cast(vTarget, Packets());
+                    EQComboT = Environment.TickCount;                    
                 }
             }
-        }
-
-        private void CastQComboEQ()
-        {
-            if (ObjectManager.Player.Spellbook.CanUseSpell(SpellSlot.Q) != SpellState.Ready)
-                return;
-
-            foreach (var Object in ObjectManager.Get<Obj_AI_Base>().Where(Obj => Obj.Distance(ObjectManager.Player) < Q.Range && Obj.Team != ObjectManager.Player.Team && Obj.HasBuff("CaitlynEntrapment", true)))
-                ObjectManager.Player.Spellbook.CastSpell(SpellSlot.Q, Object.Position);
-        }
+        }                
 
         float GetDynamicQSpeed(float distance)
         {
@@ -283,16 +265,7 @@ namespace FedAllChampionsUtility
                 }
             }
             return enemBuffs;
-        }
-
-        private void TrapTP()
-        {
-            if (ObjectManager.Player.Spellbook.CanUseSpell(SpellSlot.W) != SpellState.Ready)
-                return;
-
-            foreach (var Object in ObjectManager.Get<Obj_AI_Base>().Where(Obj => Obj.Distance(ObjectManager.Player) < 800f && Obj.Team != ObjectManager.Player.Team && Obj.HasBuff("teleport_target", true)))
-                ObjectManager.Player.Spellbook.CastSpell(SpellSlot.W, Object.Position);
-        }        
+        }      
 
         private void Drawing_OnEndScene(EventArgs args)
         {
@@ -359,11 +332,34 @@ namespace FedAllChampionsUtility
                 E.Cast(gapcloser.Sender);
         }
 
-        private void GO_OnCreate(LeagueSharp.GameObject GO, EventArgs args)
+        private void Trap_OnCreate(LeagueSharp.GameObject Trap, EventArgs args)
         {
-            if (GO.Name != "")
+            if (ObjectManager.Player.Spellbook.CanUseSpell(SpellSlot.W) != SpellState.Ready || !Program.Menu.Item("autotpW").GetValue<bool>())
+                return;
+
+            if (Trap.Name.Contains("Turret") || Trap.Name.Contains("Minion") || Trap.Name.Contains("missile")) return;
+
+            if (Trap.IsEnemy)
             {
-                Game.PrintChat(GO.Name);
+                if (Trap.Name == "GateMarker_red.troy" || Trap.Name == "GateMarker_green.troy" || Trap.Name == "Pantheon_Base_R_indicator_red.troy" || Trap.Name.Contains("teleport_target") ||
+                    Trap.Name == "LeBlanc_Displacement_Yellow_mis.troy" || Trap.Name == "Leblanc_displacement_blink_indicator_ult.troy" || Trap.Name.Contains("Crowstorm"))
+                {                    
+                    ObjectManager.Player.Spellbook.CastSpell(SpellSlot.W, Trap.Position);
+                }               
+
+                if (Trap.Name != "")
+                {
+                    Game.PrintChat("<font color=\"#00BFFF\">Federal </font>" + Trap.Name);
+                }
+            }
+        }
+
+        private void Obj_AI_Hero_OnProcessSpellCast(Obj_AI_Base sender, GameObjectProcessSpellCastEventArgs args)
+        {
+            if (sender.IsMe && Environment.TickCount - EQComboT < 500 &&
+                (args.SData.Name.Contains("CaitlynEntrapment")))
+            {                
+                Q.Cast(args.End, Packets());
             }
         }
 

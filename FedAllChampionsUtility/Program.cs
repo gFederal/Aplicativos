@@ -24,14 +24,14 @@ namespace FedAllChampionsUtility
         private static void Game_OnGameLoad(EventArgs args)
 		{
 			//AutoUpdater.InitializeUpdater();
-            if (!LiberarHWID())
+            /*if (!LiberarHWID())
             {
                 Chat.Print("HWID nao Autorizado!...");
                 Chat.Print("Entre em Contato com o Federal!");
                 Chat.Print("Obrigado!");
             }
             else
-            {
+            { */
 
                 Helper = new Helper();
                 map = new Map();
@@ -78,9 +78,10 @@ namespace FedAllChampionsUtility
                 }
 
                 Menu.AddToMainMenu();
-            }
+            //}
 		}
 
+        /*
         private static bool LiberarHWID()
         {
             System.Net.WebClient Wc = new System.Net.WebClient();
@@ -95,5 +96,6 @@ namespace FedAllChampionsUtility
                 return false;
             }
         }
+         */
 	}
 }
