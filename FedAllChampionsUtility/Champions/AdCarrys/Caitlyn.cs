@@ -31,7 +31,9 @@ namespace FedAllChampionsUtility
             Game.OnGameUpdate += Game_OnGameUpdate;
             Drawing.OnDraw += Drawing_OnDraw;
             Drawing.OnEndScene += Drawing_OnEndScene;
-            AntiGapcloser.OnEnemyGapcloser += AntiGapcloser_OnEnemyGapcloser;            
+            AntiGapcloser.OnEnemyGapcloser += AntiGapcloser_OnEnemyGapcloser;
+
+            GameObject.OnCreate += GO_OnCreate;
 
             PluginLoaded();
 
@@ -288,7 +290,7 @@ namespace FedAllChampionsUtility
             if (ObjectManager.Player.Spellbook.CanUseSpell(SpellSlot.W) != SpellState.Ready)
                 return;
 
-            foreach (var Object in ObjectManager.Get<Obj_AI_Base>().Where(Obj => Obj.Distance(ObjectManager.Player) < 800f && Obj.Team != ObjectManager.Player.Team && (Obj.HasBuff("teleport_target", true) ||Obj.HasBuff("Destiny", true))))
+            foreach (var Object in ObjectManager.Get<Obj_AI_Base>().Where(Obj => Obj.Distance(ObjectManager.Player) < 800f && Obj.Team != ObjectManager.Player.Team && Obj.HasBuff("teleport_target", true)))
                 ObjectManager.Player.Spellbook.CastSpell(SpellSlot.W, Object.Position);
         }        
 
@@ -357,13 +359,12 @@ namespace FedAllChampionsUtility
                 E.Cast(gapcloser.Sender);
         }
 
-        private void OnCreateObject(Obj_AI_Base sender, EventArgs args)
+        private void GO_OnCreate(LeagueSharp.GameObject GO, EventArgs args)
         {
-            if (sender.Name.Contains("missile") || sender.Name.Contains("Minion")) return;
-
-            Game.PrintChat(sender.Name + " - " + sender.Buffs);
-
-
+            if (GO.Name != "")
+            {
+                Game.PrintChat(GO.Name);
+            }
         }
 
     }
