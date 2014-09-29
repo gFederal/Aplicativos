@@ -187,6 +187,7 @@ namespace FedAllChampionsUtility
             {
                 if (ObjectManager.Player.Distance(rTarget) > 1300 && EnemmylowHP(Program.Menu.Item("HPR").GetValue<Slider>().Value, GetRRange()))
                 {
+                    R.Cast();
                     R.CastOnUnit(rTarget, Packets());
                 }
             }            
