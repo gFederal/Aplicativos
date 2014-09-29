@@ -24,7 +24,7 @@ namespace FedAllChampionsUtility
             Chat.Print("Somente para Amigos!");
             Chat.Print("============================");
             Chat.Print("Fed" + ObjectManager.Player.ChampionName + " Loaded!");
-            Chat.Print("Use com Moderação!");
+            Chat.Print("Use com Moderacao!");
             Chat.Print("Enjoy!");            
         }
 
