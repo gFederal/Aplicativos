@@ -19,7 +19,12 @@ namespace FedAllChampionsUtility
 
         public void PluginLoaded()
         {
+            Chat.Print("============================");
+            Chat.Print("FedUtility Version Beta");
+            Chat.Print("Somente para Amigos!");
+            Chat.Print("============================");
             Chat.Print("Fed" + ObjectManager.Player.ChampionName + " Loaded!");
+            Chat.Print("Use com Moderação!");
             Chat.Print("Enjoy!");            
         }
 
