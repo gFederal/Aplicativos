@@ -15,6 +15,7 @@ namespace FedAllChampionsUtility
 {
     class Caitlyn : Champion
     {
+        public static List<Spell> SpellList = new List<Spell>();
         public static Spell Q, W, E, R;        
         public static Vector2 PingLocation;
         public static int LastPingT = 0;
@@ -23,6 +24,8 @@ namespace FedAllChampionsUtility
         const float _spellQSpeed = 2500;
         const float _spellQSpeedMin = 400;
         const float _spellQFarmSpeed = 1600;
+
+        public static Geometrys.Rectangle rect;
         
         public Caitlyn()
         {
@@ -49,20 +52,27 @@ namespace FedAllChampionsUtility
 
             Q.SetSkillshot(0.5f, 90f, 2200f, false, SkillshotType.SkillshotLine);
             W.SetSkillshot(0.25f, 80f, 2000f, false, SkillshotType.SkillshotCircle);
-            E.SetSkillshot(0.25f, 80f, 1600f, true, SkillshotType.SkillshotLine); 
+            E.SetSkillshot(0.25f, 80f, 1600f, true, SkillshotType.SkillshotLine);
+
+            SpellList.AddRange(new[] { Q, W, E, R });
         }
 
         private void LoadMenu()
         {
             Program.Menu.AddSubMenu(new Menu("Piltover", "Piltover"));
-            Program.Menu.SubMenu("Piltover").AddItem(new MenuItem("UseQ", "Use Q Mode: - ToDo").SetValue(new StringList(new[] { "Combo", "Harass", "Both", "No" }, 1)));
-            Program.Menu.SubMenu("Piltover").AddItem(new MenuItem("KillQ", "Auto Q Kill").SetValue(true));
+            Program.Menu.SubMenu("Piltover").AddItem(new MenuItem("QMin", "Q Only out of range AA").SetValue(true));
+            Program.Menu.SubMenu("Piltover").AddItem(new MenuItem("UseQ", "Use Q Mode: ").SetValue(new StringList(new[] { "Combo", "Harass", "Both", "No" }, 1)));
+            Program.Menu.SubMenu("Piltover").AddItem(new MenuItem("KillQ", "Auto Q Kill").SetValue(true));            
             Program.Menu.SubMenu("Piltover").AddItem(new MenuItem("autoccQ", "AutoPeacemaker on CC").SetValue(true));
-            Program.Menu.SubMenu("Piltover").AddItem(new MenuItem("minMinions", "Min. Minions Q LaneClear - ToDo").SetValue(new Slider(6, 0, 10)));            
+            Program.Menu.SubMenu("Piltover").AddItem(new MenuItem("autoQMT", "Auto Q Multi Target").SetValue(true));
+            Program.Menu.SubMenu("Piltover").AddItem(new MenuItem("minAutoQMT", "Min. Targest").SetValue(new Slider(3, 2, 5)));
+            Program.Menu.SubMenu("Piltover").AddItem(new MenuItem("UseQFarm", "Use Q LaneClear").SetValue(true));
+            Program.Menu.SubMenu("Piltover").AddItem(new MenuItem("minMana", "Harass/Farm Mana %").SetValue(new Slider(40, 100, 0)));            
 
             Program.Menu.AddSubMenu(new Menu("Trap", "Trap"));
             Program.Menu.SubMenu("Trap").AddItem(new MenuItem("autoccW", "AutoTrap on CC").SetValue(true));
             Program.Menu.SubMenu("Trap").AddItem(new MenuItem("autotpW", "AutoTrap on TP").SetValue(true));
+            Program.Menu.SubMenu("Trap").AddItem(new MenuItem("autoRevW", "AutoTrap on Revive").SetValue(true));
             Program.Menu.SubMenu("Trap").AddItem(new MenuItem("AGCtrap", "AntiGapClose with W").SetValue(true));
             Program.Menu.SubMenu("Trap").AddItem(new MenuItem("casttrap", "Trap on Closest Enemy - ToDo").SetValue(new KeyBind("G".ToCharArray()[0], KeyBindType.Press)));
 
@@ -80,18 +90,38 @@ namespace FedAllChampionsUtility
 
             Program.Menu.AddSubMenu(new Menu("Drawing", "Drawing"));
             Program.Menu.SubMenu("Drawing").AddItem(new MenuItem("Draw_Disabled", "Disable All").SetValue(false));
-            Program.Menu.SubMenu("Drawing").AddItem(new MenuItem("Draw_Q", "Draw Q").SetValue(true));
-            Program.Menu.SubMenu("Drawing").AddItem(new MenuItem("Draw_W", "Draw W").SetValue(true));
-            Program.Menu.SubMenu("Drawing").AddItem(new MenuItem("Draw_E", "Draw E").SetValue(true));
-            Program.Menu.SubMenu("Drawing").AddItem(new MenuItem("Draw_R", "Draw R").SetValue(true));            
+            Program.Menu.SubMenu("Drawing").AddItem(new MenuItem("Draw_Q", "Draw Q").SetValue(new Circle(true, Color.FromArgb(150, Color.DodgerBlue))));
+            Program.Menu.SubMenu("Drawing").AddItem(new MenuItem("Draw_W", "Draw W").SetValue(new Circle(true, Color.FromArgb(150, Color.DodgerBlue))));
+            Program.Menu.SubMenu("Drawing").AddItem(new MenuItem("Draw_E", "Draw E").SetValue(new Circle(true, Color.FromArgb(150, Color.DodgerBlue))));
+            Program.Menu.SubMenu("Drawing").AddItem(new MenuItem("Draw_R", "Draw R").SetValue(new Circle(true, Color.FromArgb(150, Color.DodgerBlue))));           
             Program.Menu.SubMenu("Drawing").AddItem(new MenuItem("DrawRRangeM", "Draw R Range (Minimap)").SetValue(new Circle(true, Color.FromArgb(150, Color.DodgerBlue))));
                         
         }
         private void Game_OnGameUpdate(EventArgs args)
-        {            
-
+        {
+            //Update the R range
+            R.Range = 1500 + (500 * R.Level);
+            
             if (ObjectManager.Player.IsDead) return;
 
+            var Qmode = Program.Menu.Item("UseQ").GetValue<StringList>().SelectedIndex;
+
+            switch (Program.Orbwalker.ActiveMode)
+            {
+                case Orbwalking.OrbwalkingMode.Combo:
+                    if (Qmode == 0 || Qmode == 2)
+                        Cast_BasicLineSkillshot_Enemy(Q);
+                    break;
+                case Orbwalking.OrbwalkingMode.Mixed:
+                    if ((Qmode == 1 || Qmode == 2) && GetManaPercent() >= Program.Menu.Item("minMana").GetValue<Slider>().Value)
+                        Cast_BasicLineSkillshot_Enemy(Q);
+                    break;
+                case Orbwalking.OrbwalkingMode.LaneClear:
+                    if (Program.Menu.Item("UseQFarm").GetValue<bool>() && GetManaPercent() >= Program.Menu.Item("minMana").GetValue<Slider>().Value)
+                        Cast_BasicLineSkillshot_AOE_Farm(Q);
+                    break;
+            }
+            
             if (Program.Menu.Item("rKill").GetValue<KeyBind>().Active || Program.Menu.Item("AutoRKill").GetValue<bool>())
             {
                 AutoRKill();
@@ -120,6 +150,11 @@ namespace FedAllChampionsUtility
             if (Program.Menu.Item("KillQ").GetValue<bool>() || Program.Menu.Item("KillEQ").GetValue<bool>())
             {
                 Killer();
+            }
+
+            if (Program.Menu.Item("autoQMT").GetValue<bool>())
+            {
+                AutoQMT();
             }
 
             if (R.IsReady() && Program.Menu.Item("pingkillable").GetValue<bool>())
@@ -182,6 +217,9 @@ namespace FedAllChampionsUtility
         {
             var qTarget = SimpleTs.GetTarget(Q.Range - 50, SimpleTs.DamageType.Physical);
             var eTarget = SimpleTs.GetTarget(E.Range - 50, SimpleTs.DamageType.Physical);
+            var QonlyAA = Program.Menu.Item("QMin").GetValue<bool>();
+
+            if (QonlyAA && Orbwalking.InAutoAttackRange(qTarget)) return;
 
             if (Program.Menu.Item("KillQ").GetValue<bool>() && Program.Menu.Item("KillEQ").GetValue<bool>() && Q.IsReady() && E.IsReady() && eTarget.Health < (ObjectManager.Player.GetSpellDamage(eTarget, SpellSlot.E) + ObjectManager.Player.GetSpellDamage(eTarget, SpellSlot.Q)) * 0.9)
             {
@@ -230,12 +268,12 @@ namespace FedAllChampionsUtility
             List<Obj_AI_Hero> enemBuffed = getEnemiesBuffs();
             foreach (Obj_AI_Hero enem in enemBuffed)
             {
-                if (W.IsReady())
+                if (W.IsReady() && Program.Menu.Item("autoccW").GetValue<bool>())
                 {
                     W.CastOnUnit(enem);
                 }
 
-                if (Q.IsReady())
+                if (Q.IsReady() && Program.Menu.Item("autoccQ").GetValue<bool>())
                 {
                     if (Q.GetPrediction(enem).Hitchance >= HitChance.High)
                         Q.Cast(enem, Packets());
@@ -257,7 +295,8 @@ namespace FedAllChampionsUtility
                         buff.Name == "namiqdebuff" || buff.Name == "nautilusanchordragroot" || buff.Name == "RunePrison" || buff.Name == "SonaR" || buff.Name == "sejuaniglacialprison" || buff.Name == "swainshadowgrasproot" ||
                         buff.Name == "threshqfakeknockup" || buff.Name == "VeigarStun" || buff.Name == "velkozestun" || buff.Name == "virdunkstun" || buff.Name == "viktorgravitonfieldstun" || buff.Name == "yasuoq3mis" ||
                         buff.Name == "zyragraspingrootshold" || buff.Name == "zyrabramblezoneknockup" || buff.Name == "katarinarsound" || buff.Name == "lissandrarself" || buff.Name == "AlZaharNetherGrasp" || buff.Name == "Meditate" ||
-                        buff.Name == "missfortunebulletsound" || buff.Name == "AbsoluteZero" || buff.Name == "pantheonesound" || buff.Name == "VelkozR" || buff.Name == "infiniteduresssound" || buff.Name == "chronorevive" || buff.Type == BuffType.Suppression)                   
+                        buff.Name == "missfortunebulletsound" || buff.Name == "AbsoluteZero" || buff.Name == "pantheonesound" || buff.Name == "VelkozR" || buff.Name == "infiniteduresssound" || buff.Name == "chronorevive" || 
+                        buff.Type == BuffType.Suppression)                   
                     {
                         enemBuffs.Add(enem);
                         break;
@@ -275,8 +314,7 @@ namespace FedAllChampionsUtility
             if (R.Level == 0) return;
             var menuItem = Program.Menu.Item("DrawRRangeM").GetValue<Circle>();
             if (menuItem.Active)
-                Utility.DrawCircle(ObjectManager.Player.Position, GetRRange(), menuItem.Color, 2, 30, true);
-            
+                Utility.DrawCircle(ObjectManager.Player.Position, R.Range, menuItem.Color, 2, 30, true);            
         }
 
         private void Drawing_OnDraw(EventArgs args)
@@ -284,29 +322,12 @@ namespace FedAllChampionsUtility
             if (Program.Menu.Item("Draw_Disabled").GetValue<bool>())
                 return;
 
-            if (Program.Menu.Item("Draw_Q").GetValue<bool>())
-                if (Q.Level > 0)
-                    Utility.DrawCircle(ObjectManager.Player.Position, Q.Range, Q.IsReady() ? Color.Green : Color.Red);
-
-            if (Program.Menu.Item("Draw_W").GetValue<bool>())
-                if (W.Level > 0)
-                    Utility.DrawCircle(ObjectManager.Player.Position, W.Range, W.IsReady() ? Color.Green : Color.Red);
-
-            if (Program.Menu.Item("Draw_E").GetValue<bool>())
-                if (E.Level > 0)
-                    Utility.DrawCircle(ObjectManager.Player.Position, E.Range, E.IsReady() ? Color.Green : Color.Red);
-
-            if (Program.Menu.Item("Draw_R").GetValue<bool>())
-                if (R.Level > 0)
-                    Utility.DrawCircle(ObjectManager.Player.Position, GetRRange(), R.IsReady() ? Color.Green : Color.Red);
-
-            var victims = "";
-
-            foreach (var target in Program.Helper.EnemyInfo.Where(x =>
-             x.Player.IsVisible && x.Player.IsValidTarget(R.Range) && !x.Player.IsDead && ObjectManager.Player.GetSpellDamage(x.Player, SpellSlot.R) * 0.9 >= x.Player.Health))
+            foreach (var spell in SpellList)
             {
-                victims += target.Player.ChampionName + " ";                                
-            }            
+                var menuItem = Program.Menu.Item("Draw_"+ spell.Slot).GetValue<Circle>();
+                if (menuItem.Active && (spell.Slot != SpellSlot.R || R.Level > 0))
+                    Utility.DrawCircle(ObjectManager.Player.Position, spell.Range, spell.IsReady() ? menuItem.Color : Color.Red);
+            }      
         }
 
         private void Ping(Vector2 position)
@@ -334,32 +355,97 @@ namespace FedAllChampionsUtility
 
         private void Trap_OnCreate(LeagueSharp.GameObject Trap, EventArgs args)
         {
-            if (ObjectManager.Player.Spellbook.CanUseSpell(SpellSlot.W) != SpellState.Ready || !Program.Menu.Item("autotpW").GetValue<bool>())
+            if (ObjectManager.Player.Spellbook.CanUseSpell(SpellSlot.W) != SpellState.Ready ||
+                (!Program.Menu.Item("autotpW").GetValue<bool>() && !Program.Menu.Item("autoRevW").GetValue<bool>()))
                 return;
-
-            if (Trap.Name.Contains("Turret") || Trap.Name.Contains("Minion") || Trap.Name.Contains("missile")) return;
-
-            if (Trap.IsEnemy)
+            
+            // Teleport
+            if (Program.Menu.Item("autotpW").GetValue<bool>())
             {
-                if (Trap.Name == "GateMarker_red.troy" || Trap.Name == "GateMarker_green.troy" || Trap.Name == "Pantheon_Base_R_indicator_red.troy" || Trap.Name.Contains("teleport_target") ||
-                    Trap.Name == "LeBlanc_Displacement_Yellow_mis.troy" || Trap.Name == "Leblanc_displacement_blink_indicator_ult.troy" || Trap.Name.Contains("Crowstorm"))
-                {                    
-                    ObjectManager.Player.Spellbook.CastSpell(SpellSlot.W, Trap.Position);
-                }               
 
-                if (Trap.Name != "")
+                if (Trap.Name.Contains("GateMarker_red") || Trap.Name == "Pantheon_Base_R_indicator_red.troy" || Trap.Name.Contains("teleport_target_red") ||
+                        Trap.Name == "LeBlanc_Displacement_Yellow_mis.troy" || Trap.Name == "Leblanc_displacement_blink_indicator_ult.troy" || Trap.Name.Contains("Crowstorm"))
                 {
-                    Game.PrintChat("<font color=\"#00BFFF\">Federal </font>" + Trap.Name);
+                    if (Trap.IsEnemy) 
+                    {
+                        var target = ObjectManager.Get<Obj_AI_Hero>().FirstOrDefault(enemy => enemy.IsEnemy  && enemy.Distance(Trap.Position) < W.Range);
+                        ObjectManager.Player.Spellbook.CastSpell(SpellSlot.W, target);
+                    }
+                }
+            }
+
+            // Revive
+            if (Program.Menu.Item("autoRevW").GetValue<bool>())
+            {
+                if (Trap.Name == "LifeAura.troy" || Trap.Name == "ZacPassiveExplosion.troy" || Trap.Name == "RebirthBlob" || Trap.Name.Contains("Passive_Death_Activate"))
+                {
+                    if (Trap.IsEnemy) 
+                    {
+                        var target = ObjectManager.Get<Obj_AI_Hero>().FirstOrDefault(enemy => enemy.IsEnemy && enemy.Distance(Trap.Position) < W.Range);
+                        ObjectManager.Player.Spellbook.CastSpell(SpellSlot.W, target);
+                    }
                 }
             }
         }
-
         private void Obj_AI_Hero_OnProcessSpellCast(Obj_AI_Base sender, GameObjectProcessSpellCastEventArgs args)
         {
             if (sender.IsMe && Environment.TickCount - EQComboT < 500 &&
                 (args.SData.Name.Contains("CaitlynEntrapment")))
             {                
                 Q.Cast(args.End, Packets());
+            }
+        }
+
+        private Obj_AI_Hero GetEnemyHitByQ(Spell Q, int numHit)
+        {
+            int totalHit = 0;
+            Obj_AI_Hero target = null;
+
+            foreach (Obj_AI_Hero current in ObjectManager.Get<Obj_AI_Hero>())
+            {
+
+                var prediction = Q.GetPrediction(current, true);
+
+                if (Vector3.Distance(ObjectManager.Player.Position, prediction.CastPosition) <= Q.Range - 50)
+                {
+
+                    Vector2 extended = current.Position.To2D().Extend(ObjectManager.Player.Position.To2D(), -Q.Range + Vector2.Distance(ObjectManager.Player.Position.To2D(), current.Position.To2D()));
+                    rect = new Geometrys.Rectangle(ObjectManager.Player.Position.To2D(), extended, Q.Width);
+
+                    if (!current.IsMe && current.IsEnemy)
+                    {
+                        totalHit = 1;
+                        foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>())
+                        {
+                            if (enemy.IsEnemy && current.ChampionName != enemy.ChampionName && !enemy.IsDead && !rect.ToPolygon().IsOutside(enemy.Position.To2D()))
+                            {
+                                totalHit += 1;
+                            }
+                        }
+                    }
+
+                    if (totalHit >= numHit)
+                    {
+                        target = current;
+                        break;
+                    }
+                }
+
+            }
+
+            return target;
+        }
+
+        private void AutoQMT()
+        {
+            var minHit = GetEnemyHitByQ(Q, Program.Menu.Item("minAutoQMT").GetValue<Slider>().Value);
+
+            if (minHit != null)
+            {
+                var QonlyAA = Program.Menu.Item("QMin").GetValue<bool>();
+                if (QonlyAA && Orbwalking.InAutoAttackRange(minHit)) return;
+
+                Q.Cast(minHit, true);
             }
         }
 
