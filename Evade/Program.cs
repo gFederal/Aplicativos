@@ -579,6 +579,11 @@ namespace Evade
                     return;
                 }
 
+                if (EvadeSpellDatabase.Spells.Any(evadeSpell => evadeSpell.Name == "Walking" && !evadeSpell.Enabled)) 
+                {
+                    return;
+                }
+
                 //Spell Shielded
                 if (IsSpellShielded(ObjectManager.Player))
                 {
