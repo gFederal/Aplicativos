@@ -17,6 +17,8 @@ namespace FedAllChampionsUtility
     {
         public static Spell Q, W, E, R;
         public static Vector2 PingLocation;
+        public static int LastPingT = 0;
+
         public Nocturne()
         {
             LoadMenu();
@@ -25,7 +27,7 @@ namespace FedAllChampionsUtility
             Game.OnGameUpdate += Game_OnGameUpdate;
             Drawing.OnDraw += Drawing_OnDraw;
             Drawing.OnEndScene += Drawing_OnEndScene;
-            Interrupter.OnPossibleToInterrupt += Interrupter_OnPossibleToInterrupt;
+            Interrupter.OnPossibleToInterrupt += Interrupter_OnPossibleToInterrupt;            
 
             PluginLoaded();
         }
@@ -47,6 +49,7 @@ namespace FedAllChampionsUtility
             Program.Menu.SubMenu("TeamFight").AddItem(new MenuItem("UseWCombo", "Use W").SetValue(true));
             Program.Menu.SubMenu("TeamFight").AddItem(new MenuItem("UseECombo", "Use E").SetValue(true));
             Program.Menu.SubMenu("TeamFight").AddItem(new MenuItem("UseRCombo", "Use R").SetValue(true));
+            Program.Menu.SubMenu("TeamFight").AddItem(new MenuItem("UseRHP", "% HP to R Combo: ").SetValue<Slider>(new Slider(50, 100, 10)));
             Program.Menu.SubMenu("TeamFight").AddItem(new MenuItem("ComboActive", "Combo!").SetValue(new KeyBind(32, KeyBindType.Press)));
 
             Program.Menu.AddSubMenu(new Menu("Harass", "Harass"));
@@ -56,8 +59,7 @@ namespace FedAllChampionsUtility
             Program.Menu.SubMenu("Harass").AddItem(new MenuItem("HarassActive", "Harass!").SetValue(new KeyBind("C".ToCharArray()[0], KeyBindType.Press)));
 
             Program.Menu.AddSubMenu(new Menu("LaneClear", "LaneClear"));
-            Program.Menu.SubMenu("LaneClear").AddItem(new MenuItem("UseQFarm", "Use Q").SetValue(true));
-            Program.Menu.SubMenu("LaneClear").AddItem(new MenuItem("useQHit", "Q Min hit").SetValue(new Slider(3, 6, 1)));
+            Program.Menu.SubMenu("LaneClear").AddItem(new MenuItem("UseQFarm", "Use Q").SetValue(true));            
             AddManaManager("LaneClear", 30);            
             Program.Menu.SubMenu("LaneClear").AddItem(new MenuItem("LaneClearActive", "LaneClear!").SetValue(new KeyBind("V".ToCharArray()[0], KeyBindType.Press)));
 
@@ -72,7 +74,7 @@ namespace FedAllChampionsUtility
             Program.Menu.SubMenu("Misc").AddItem(new MenuItem("AutoRHP", "Auto R LowHP").SetValue(new KeyBind("T".ToCharArray()[0], KeyBindType.Press)));
             Program.Menu.SubMenu("Misc").AddItem(new MenuItem("HPR", "% Low HP: ").SetValue<Slider>(new Slider(30, 100, 10)));
             Program.Menu.SubMenu("Misc").AddItem(new MenuItem("useR_Killableping", "Ping if is Low HP").SetValue(true));
-            Program.Menu.SubMenu("Misc").AddItem(new MenuItem("AutoRStrong", "Auto R Most AD/AP").SetValue(new KeyBind("G".ToCharArray()[0], KeyBindType.Press)));
+            Program.Menu.SubMenu("Misc").AddItem(new MenuItem("AutoRStrong", "R Most AD/AP in Rage").SetValue(new KeyBind("G".ToCharArray()[0], KeyBindType.Press)));
             Program.Menu.SubMenu("Misc").AddItem(new MenuItem("MostR", "R Most: ").SetValue(new StringList(new[] { "AD", "AP", "Easy" }, 0))); 
 
             Program.Menu.AddSubMenu(new Menu("Drawing", "Drawing"));
@@ -116,10 +118,18 @@ namespace FedAllChampionsUtility
                 AutoRLowHP();
             }
 
-            if (Program.Menu.Item("AutoRStrong").GetValue<bool>())
+            if (Program.Menu.Item("AutoRStrong").GetValue<KeyBind>().Active)
             {
                 AutoRMode();
-            }            
+            }
+
+            if (R.IsReady() && Program.Menu.Item("useR_Killableping").GetValue<bool>())
+            {
+                foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(h => h.IsValidTarget(GetRRange()) && !h.IsDead && EnemmylowHP(Program.Menu.Item("HPR").GetValue<Slider>().Value, GetRRange())))
+                {
+                    Ping(enemy.Position.To2D());
+                }
+            }
         }
         private float GetRRange()
         {
@@ -166,6 +176,7 @@ namespace FedAllChampionsUtility
 
             if (R.IsReady() && newtarget != null)
             {
+                R.Cast();
                 R.CastOnUnit(newtarget, Packets());
             }            
         }
@@ -174,7 +185,7 @@ namespace FedAllChampionsUtility
             var rTarget = SimpleTs.GetTarget(GetRRange(), SimpleTs.DamageType.Physical);
             if (R.IsReady() && rTarget != null)
             {
-                if (ObjectManager.Player.Distance(rTarget) > 1200 && EnemmylowHP(Program.Menu.Item("HPR").GetValue<Slider>().Value, GetRRange()))
+                if (ObjectManager.Player.Distance(rTarget) > 1100 && EnemmylowHP(Program.Menu.Item("HPR").GetValue<Slider>().Value, GetRRange()))
                 {
                     R.Cast();
                     R.CastOnUnit(rTarget, Packets());
@@ -186,24 +197,22 @@ namespace FedAllChampionsUtility
             var rTarget = SimpleTs.GetTarget(GetRRange(), SimpleTs.DamageType.Physical);
             if (R.IsReady() && Program.Menu.Item("UseRCombo").GetValue<bool>())
             {
-                if (ObjectManager.Player.Distance(rTarget) > 1300 && EnemmylowHP(Program.Menu.Item("HPR").GetValue<Slider>().Value, GetRRange()))
+                if (ObjectManager.Player.Distance(rTarget) > 1100 && EnemmylowHP(Program.Menu.Item("UseRHP").GetValue<Slider>().Value, GetRRange()))
                 {
                     R.Cast();
                     R.CastOnUnit(rTarget, Packets());
                 }
-            }            
+            }
             
-            var qTarget = SimpleTs.GetTarget(Q.Range - 50, SimpleTs.DamageType.Physical);
             if (Q.IsReady() && Program.Menu.Item("UseQCombo").GetValue<bool>())
             {
-                if (Q.GetPrediction(qTarget).Hitchance >= HitChance.High)
-                    Q.Cast(qTarget, Packets());
+                Cast_BasicLineSkillshot_Enemy(Q);
             }
 
             var eTarget = SimpleTs.GetTarget(E.Range - 30, SimpleTs.DamageType.Physical);
             if (E.IsReady() && Program.Menu.Item("UseECombo").GetValue<bool>())
             {
-                E.CastOnUnit(qTarget, Packets());
+                Cast_onEnemy(E);
             }
 
             if (W.IsReady() && Program.Menu.Item("UseWCombo").GetValue<bool>())
@@ -215,32 +224,22 @@ namespace FedAllChampionsUtility
             }
         }
         private void Harass()
-        {
-            var qTarget = SimpleTs.GetTarget(Q.Range - 50, SimpleTs.DamageType.Physical);
+        {            
             if (Q.IsReady() && Program.Menu.Item("UseQHarass").GetValue<bool>())
             {
-                if (Q.GetPrediction(qTarget).Hitchance >= HitChance.High)
-                    Q.Cast(qTarget, Packets());
+                Cast_BasicLineSkillshot_Enemy(Q);
             }
-
-            var eTarget = SimpleTs.GetTarget(E.Range - 30, SimpleTs.DamageType.Physical);
+            
             if (E.IsReady() && Program.Menu.Item("UseEHarass").GetValue<bool>())
             {
-                E.CastOnUnit(qTarget, Packets());
+                Cast_onEnemy(E);
             }
         }
         private void LaneClear()
-        {
-            List<Obj_AI_Base> minions = MinionManager.GetMinions(ObjectManager.Player.ServerPosition, Q.Range, MinionTypes.All, MinionTeam.NotAlly);
-
+        { 
             if (Q.IsReady() && Program.Menu.Item("UseQFarm").GetValue<bool>())
             {
-                List<Vector2> minionPs = MinionManager.GetMinionsPredictedPositions(minions, 0.25f, 60f, 1600f, ObjectManager.Player.ServerPosition, 1200f, false, SkillshotType.SkillshotLine);
-                MinionManager.FarmLocation farm = Q.GetLineFarmLocation(minionPs);
-                if (farm.MinionsHit >= Program.Menu.Item("useQHit").GetValue<Slider>().Value)
-                {
-                    Q.Cast(farm.Position, Packets());
-                }
+                Cast_BasicLineSkillshot_AOE_Farm(Q);
             }
         }
         private void JungleFarm()
@@ -283,6 +282,8 @@ namespace FedAllChampionsUtility
         }
         private void Ping(Vector2 position)
         {
+            if (Environment.TickCount - LastPingT < 30 * 1000) return;
+            LastPingT = Environment.TickCount;
             PingLocation = position;
             SimplePing();
             Utility.DelayAction.Add(150, SimplePing);
@@ -320,24 +321,7 @@ namespace FedAllChampionsUtility
             if (Program.Menu.Item("Draw_R").GetValue<bool>())
                 if (R.Level > 0)
                     Utility.DrawCircle(ObjectManager.Player.Position, GetRRange(), R.IsReady() ? Color.Green : Color.Red);
-
-            var victims = "";
-
-            foreach (var target in Program.Helper.EnemyInfo.Where(x =>
-             x.Player.IsVisible && x.Player.IsValidTarget(GetRRange()) && !x.Player.IsDead && EnemmylowHP(Program.Menu.Item("HPR").GetValue<Slider>().Value, GetRRange())))
-            {
-                victims += target.Player.ChampionName + " ";
-
-                if (!R.IsReady() || !Program.Menu.Item("useR_Killableping").GetValue<bool>() ||
-                    (target.LastPinged != 0 && Environment.TickCount - target.LastPinged <= 9000))
-                    continue;
-                if (!(ObjectManager.Player.Distance(target.Player) < GetRRange()) ||
-                    (!target.Player.IsVisible))
-                    continue;
-
-                Ping(target.Player.Position.To2D());
-                target.LastPinged = Environment.TickCount;
-            }            
+            
         }
         private void Interrupter_OnPossibleToInterrupt(Obj_AI_Base unit, InterruptableSpell spell)
         {
@@ -346,5 +330,6 @@ namespace FedAllChampionsUtility
             if (ObjectManager.Player.Distance(unit) < E.Range && E.IsReady() && unit.IsEnemy)
                 E.CastOnUnit(unit, Packets());
         }
+        
     }
 }

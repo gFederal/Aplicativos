@@ -25,10 +25,8 @@ namespace FedAllChampionsUtility
             if (args.PacketData[0] == Packet.S2C.PlayerDisconnect.Header && Program.Menu.Item("Alerter").GetValue<bool>())
             {
 
-                Game.PrintChat(
-                    "<b><font color=\"#FF0000\">" +
-                    Packet.S2C.PlayerDisconnect.Decoded(args.PacketData).Player.ChampionName +
-                    "</font></b><font color=\"#FFFFFF\" has disconnected!</font></b>");
+                Game.PrintChat("<b><font color='#FF0000'>" + Packet.S2C.PlayerDisconnect.Decoded(args.PacketData).Player.ChampionName +
+                    "</font></b><font color='#FFFFFF'> has disconnected!</font></b>");
             }
         }
     }

@@ -12,6 +12,31 @@ namespace FedAllChampionsUtility
 {
     class Yasuo : Champion
     {
+
+        internal class YasDash
+        {
+            public Vector3 from = new Vector3(-1, -1, -1);
+            public Vector3 to = new Vector3(-1, -1, -1);
+
+            public YasDash()
+            {
+                from = new Vector3(-1, -1, -1);
+                to = new Vector3(-1, -1, -1);
+            }
+
+            public YasDash(Vector3 fromV, Vector3 toV)
+            {
+                from = fromV;
+                to = toV;
+            }
+
+            public YasDash(YasDash dash)
+            {
+                from = dash.from;
+                to = dash.to;
+            }
+
+        }
         internal class YasWall
         {
             public Obj_SpellLineMissile pointL;
@@ -41,12 +66,18 @@ namespace FedAllChampionsUtility
                 endtime = Game.Time + 4;
             }
         }
+
+        public static List<YasDash> dashes = new List<YasDash>();
+        public static YasDash lastDash = new YasDash();
         
         public static Obj_AI_Hero Player = ObjectManager.Player;
         public static List<Obj_SpellMissile> skillShots = new List<Obj_SpellMissile>();
 
         public static string lastSpell = "";
         public static int afterDash = 0;
+        public static bool canSave = true;
+        public static bool canExport = true;
+        public static bool canDelete = true;
         public static List<string> WIgnore = null;
 
         public static Spellbook sBook = Player.Spellbook;
@@ -67,11 +98,167 @@ namespace FedAllChampionsUtility
         public static float time = 0;
 
         public static YasWall wall = new YasWall();
+
+        public static JungleTimers jTimers;
+
+        #region WallDashing
+
+        public static void setDashes()
+        {
+            #region WallDashingValues
+            dashes.Add(new YasDash(new Vector3(5997.00f, 5065.00f, 51.67f), new Vector3(6447.35f, 5216.45f, 56.11f)));
+            dashes.Add(new YasDash(new Vector3(6897.00f, 5665.00f, 55.66f), new Vector3(6659.32f, 5285.89f, 58.84f)));
+            dashes.Add(new YasDash(new Vector3(3847.00f, 5965.00f, 55.13f), new Vector3(3477.00f, 6263.00f, 55.61f)));
+            dashes.Add(new YasDash(new Vector3(3197.00f, 6815.00f, 53.86f), new Vector3(3328.71f, 6366.87f, 55.61f)));
+            dashes.Add(new YasDash(new Vector3(6615.00f, 5197.00f, 56.40f), new Vector3(6885.00f, 5761.00f, 55.60f)));
+            dashes.Add(new YasDash(new Vector3(3435.00f, 6267.00f, 55.61f), new Vector3(4003.00f, 6007.00f, 54.55f)));
+            dashes.Add(new YasDash(new Vector3(3353.00f, 6319.00f, 55.61f), new Vector3(3141.00f, 6745.00f, 53.93f)));
+            dashes.Add(new YasDash(new Vector3(6511.00f, 5233.00f, 57.02f), new Vector3(5972.25f, 5084.35f, 51.67f)));
+            dashes.Add(new YasDash(new Vector3(5997.00f, 5065.00f, 51.67f), new Vector3(6447.35f, 5216.45f, 56.11f)));
+            dashes.Add(new YasDash(new Vector3(6897.00f, 5665.00f, 55.66f), new Vector3(6659.32f, 5285.89f, 58.84f)));
+            dashes.Add(new YasDash(new Vector3(3847.00f, 5965.00f, 55.13f), new Vector3(3477.00f, 6263.00f, 55.61f)));
+            dashes.Add(new YasDash(new Vector3(3197.00f, 6815.00f, 53.86f), new Vector3(3328.71f, 6366.87f, 55.61f)));
+            dashes.Add(new YasDash(new Vector3(6615.00f, 5197.00f, 56.40f), new Vector3(6885.00f, 5761.00f, 55.60f)));
+            dashes.Add(new YasDash(new Vector3(3435.00f, 6267.00f, 55.61f), new Vector3(4003.00f, 6007.00f, 54.55f)));
+            dashes.Add(new YasDash(new Vector3(3353.00f, 6319.00f, 55.61f), new Vector3(3141.00f, 6745.00f, 53.93f)));
+            dashes.Add(new YasDash(new Vector3(6511.00f, 5233.00f, 57.02f), new Vector3(5972.25f, 5084.35f, 51.67f)));
+            dashes.Add(new YasDash(new Vector3(7319.51f, 7394.79f, 54.01f), new Vector3(7709.69f, 7649.68f, 53.35f)));
+            dashes.Add(new YasDash(new Vector3(3423.00f, 7719.00f, 55.06f), new Vector3(3541.61f, 7204.61f, 54.48f)));
+            dashes.Add(new YasDash(new Vector3(3469.00f, 7739.00f, 55.01f), new Vector3(3979.00f, 8101.00f, 51.94f)));
+            dashes.Add(new YasDash(new Vector3(3579.00f, 7217.00f, 54.39f), new Vector3(3452.67f, 7586.14f, 55.04f)));
+            dashes.Add(new YasDash(new Vector3(4027.00f, 7829.00f, 51.99f), new Vector3(3617.00f, 7589.00f, 54.40f)));
+            dashes.Add(new YasDash(new Vector3(1789.00f, 8209.00f, 54.92f), new Vector3(1241.82f, 8198.85f, 50.63f)));
+            dashes.Add(new YasDash(new Vector3(1297.00f, 8113.00f, 50.86f), new Vector3(1759.00f, 8223.00f, 54.92f)));
+            dashes.Add(new YasDash(new Vector3(7901.00f, 2423.00f, 54.28f), new Vector3(7982.06f, 2994.11f, 55.34f)));
+            dashes.Add(new YasDash(new Vector3(8213.00f, 2429.00f, 54.28f), new Vector3(8221.72f, 2912.02f, 57.89f)));
+            dashes.Add(new YasDash(new Vector3(8245.00f, 2415.00f, 54.28f), new Vector3(8110.77f, 2953.00f, 56.58f)));
+            dashes.Add(new YasDash(new Vector3(7259.00f, 3821.00f, 57.42f), new Vector3(7213.00f, 3965.00f, 57.29f)));
+            dashes.Add(new YasDash(new Vector3(7795.00f, 2915.00f, 54.70f), new Vector3(7936.29f, 2465.55f, 54.28f)));
+            dashes.Add(new YasDash(new Vector3(7423.00f, 3763.00f, 56.91f), new Vector3(7751.41f, 3288.25f, 54.77f)));
+            dashes.Add(new YasDash(new Vector3(7293.00f, 3893.00f, 57.30f), new Vector3(6671.00f, 3883.00f, 51.67f)));
+            dashes.Add(new YasDash(new Vector3(12311.00f, 6151.00f, 54.84f), new Vector3(12444.78f, 6731.78f, 54.85f)));
+            dashes.Add(new YasDash(new Vector3(12233.00f, 6235.00f, 54.86f), new Vector3(12782.00f, 6383.88f, 56.40f)));
+            dashes.Add(new YasDash(new Vector3(12267.00f, 6313.00f, 54.83f), new Vector3(12775.00f, 5951.00f, 58.53f)));
+            dashes.Add(new YasDash(new Vector3(10445.00f, 7263.00f, 55.32f), new Vector3(10384.54f, 6816.62f, 54.87f)));
+            dashes.Add(new YasDash(new Vector3(10701.00f, 8105.00f, 63.34f), new Vector3(10678.48f, 7568.38f, 55.35f)));
+            dashes.Add(new YasDash(new Vector3(10529.00f, 8083.00f, 65.67f), new Vector3(9949.00f, 8319.00f, 64.18f)));
+            dashes.Add(new YasDash(new Vector3(10595.00f, 6615.00f, 54.87f), new Vector3(9977.00f, 6511.00f, 55.13f)));
+            dashes.Add(new YasDash(new Vector3(10645.00f, 7563.00f, 55.35f), new Vector3(10702.72f, 8030.58f, 64.66f)));
+            dashes.Add(new YasDash(new Vector3(12745.00f, 6215.00f, 57.56f), new Vector3(12277.06f, 6270.45f, 54.84f)));
+            dashes.Add(new YasDash(new Vector3(10545.00f, 6765.00f, 54.87f), new Vector3(10861.00f, 7303.00f, 55.35f)));
+            dashes.Add(new YasDash(new Vector3(10695.00f, 7263.00f, 55.35f), new Vector3(10577.00f, 6803.00f, 54.87f)));
+            dashes.Add(new YasDash(new Vector3(7411.00f, 9301.00f, 55.46f), new Vector3(7003.00f, 8827.00f, 56.02f)));
+            dashes.Add(new YasDash(new Vector3(7535.00f, 9207.00f, 55.51f), new Vector3(7987.00f, 9637.00f, 53.53f)));
+            dashes.Add(new YasDash(new Vector3(7923.00f, 9409.00f, 53.53f), new Vector3(7491.00f, 9207.00f, 55.51f)));
+            dashes.Add(new YasDash(new Vector3(6197.00f, 11513.00f, 54.63f), new Vector3(6135.00f, 11983.00f, 39.60f)));
+            dashes.Add(new YasDash(new Vector3(6561.00f, 10737.00f, 54.64f), new Vector3(6083.00f, 11137.00f, 54.36f)));
+            dashes.Add(new YasDash(new Vector3(6147.00f, 12013.00f, 39.61f), new Vector3(6101.00f, 11389.00f, 54.62f)));
+            dashes.Add(new YasDash(new Vector3(5797.00f, 11963.00f, 39.60f), new Vector3(6239.00f, 11521.00f, 54.63f)));
+            dashes.Add(new YasDash(new Vector3(6577.00f, 10715.00f, 54.64f), new Vector3(6123.00f, 11143.00f, 54.42f)));
+            dashes.Add(new YasDash(new Vector3(5843.00f, 12025.00f, 39.62f), new Vector3(5867.00f, 11399.00f, 54.00f)));
+            dashes.Add(new YasDash(new Vector3(6581.00f, 10761.00f, 54.64f), new Vector3(6034.87f, 10917.85f, 53.88f)));
+            dashes.Add(new YasDash(new Vector3(5797.00f, 11963.00f, 39.60f), new Vector3(6182.85f, 11577.15f, 54.63f)));
+            dashes.Add(new YasDash(new Vector3(6085.00f, 11993.00f, 39.61f), new Vector3(6397.00f, 11529.00f, 54.63f)));
+            dashes.Add(new YasDash(new Vector3(5801.00f, 11975.00f, 39.60f), new Vector3(6150.74f, 11506.03f, 54.63f)));
+            dashes.Add(new YasDash(new Vector3(6073.00f, 12013.00f, 39.61f), new Vector3(6359.35f, 11537.81f, 54.63f)));
+            dashes.Add(new YasDash(new Vector3(7195.00f, 8713.00f, 56.02f), new Vector3(7461.15f, 9067.39f, 55.60f)));
+            dashes.Add(new YasDash(new Vector3(10605.00f, 6609.00f, 54.86f), new Vector3(9981.00f, 6565.00f, 55.12f)));
+            #endregion
+            jTimers = new JungleTimers();
+        }
+
+        public static YasDash getClosestDash(float dist = 350)
+        {
+            YasDash closestWall = dashes[0];
+            for (int i = 1; i < dashes.Count; i++)
+            {
+                closestWall = closestDashToMouse(closestWall, dashes[i]);
+            }
+            if (closestWall.to.Distance(Game.CursorPos) < dist)
+                return closestWall;
+            return null;
+        }
+
+        public static YasDash closestDashToMouse(YasDash w1, YasDash w2)
+        {
+            return Vector3.DistanceSquared(w1.to, Game.CursorPos) + Vector3.DistanceSquared(w1.from, Player.Position) > Vector3.DistanceSquared(w2.to, Game.CursorPos) + Vector3.DistanceSquared(w2.from, Player.Position) ? w2 : w1;
+        }
+
+        public static void saveLastDash()
+        {
+            if (lastDash.from.X != -1 && lastDash.from.Y != -1)
+                dashes.Add(new YasDash(lastDash));
+            lastDash = new YasDash();
+        }
+
+        public static void fleeToMouse()
+        {
+            try
+            {
+                YasDash closeDash = getClosestDash();
+                if (closeDash != null)
+                {
+                    List<Obj_AI_Base> jumps = canGoThrough(closeDash);
+                    if (jumps.Count > 0 || ((W.IsReady() || (wall != null && (wall.endtime - Game.Time) > 3f)) && jTimers.closestJCUp(closeDash.to)))
+                    {
+                        var distToDash = Player.Distance(closeDash.from);
+
+                        if (W.IsReady() && distToDash < 136f && jumps.Count == 0 && MinionManager.GetMinions(Game.CursorPos, 350).Where(min => min.IsVisible).Count() < 2)
+                        {
+                            W.Cast(closeDash.to);
+                        }
+
+                        if (distToDash > 2f)
+                        {
+                            Player.IssueOrder(GameObjectOrder.MoveTo, closeDash.from);
+                            return;
+                        }
+
+                        if (distToDash < 3f && jumps.Count > 0)
+                        {
+                            E.Cast(jumps.First());
+                        }
+                        return;
+                    }
+                }
+                if (getClosestDash(400) == null)
+                    gapCloseE(Game.CursorPos.To2D());
+                Player.IssueOrder(GameObjectOrder.MoveTo, Game.CursorPos);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+            }
+        }
+
+        public static List<Obj_AI_Base> canGoThrough(YasDash dash)
+        {
+            List<Obj_AI_Base> jumps = ObjectManager.Get<Obj_AI_Base>().Where(enemy => enemyIsJumpable(enemy) && enemy.IsValidTarget(550, true, dash.to)).ToList();
+            
+            List<Obj_AI_Base> canBejump = new List<Obj_AI_Base>();
+            foreach (var jumpe in jumps)
+            {
+                if (interCir(dash.from.To2D(), dash.to.To2D(), jumpe.Position.To2D(), 35) /*&& jumpe.Distance(dash.to) < Player.Distance(dash.to)*/)
+                {
+                    canBejump.Add(jumpe);
+                }
+            }
+            return canBejump.OrderBy(jum => Player.Distance(jum)).ToList();
+        }
+
+
+        public static float getLengthTillPos(Vector3 pos)
+        {
+            return 0;
+        }
+
+        #endregion
         
         public Yasuo()
         {
             LoadMenu();
             LoadSpells();
+            setDashes();
 
             Game.OnGameUpdate += OnGameUpdate;
             GameObject.OnCreate += OnCreateObject;
@@ -106,7 +293,13 @@ namespace FedAllChampionsUtility
             Program.Menu.AddSubMenu(new Menu("Passive", "Passive"));
             Program.Menu.SubMenu("Passive").AddItem(new MenuItem("djTur", "Dont Jump turrets").SetValue(true));            
             Program.Menu.SubMenu("Passive").AddItem(new MenuItem("useR_KS", "Use R for KS").SetValue(true));
-            Program.Menu.SubMenu("Passive").AddItem(new MenuItem("flee", "Flee E").SetValue(new KeyBind('Z', KeyBindType.Press, false)));            
+            Program.Menu.SubMenu("Passive").AddItem(new MenuItem("flee", "Flee E").SetValue(new KeyBind('Z', KeyBindType.Press, false)));
+            Program.Menu.SubMenu("Passive").AddItem(new MenuItem("disDraw", "Dissabel drawing").SetValue(false));
+
+            Program.Menu.AddSubMenu(new Menu("Debugs", "Debug"));
+            Program.Menu.SubMenu("Debug").AddItem(new MenuItem("saveDash", "saveDashd")).SetValue(new KeyBind('o', KeyBindType.Press, false));
+            Program.Menu.SubMenu("Debug").AddItem(new MenuItem("exportDash", "export dashes")).SetValue(new KeyBind('p', KeyBindType.Press, false));
+            Program.Menu.SubMenu("Debug").AddItem(new MenuItem("deleteDash", "deleteLastDash")).SetValue(new KeyBind('i', KeyBindType.Press, false));
             
         }
 
@@ -158,9 +351,52 @@ namespace FedAllChampionsUtility
 
             if (Program.Menu.Item("flee").GetValue<KeyBind>().Active)
             {
-                Player.IssueOrder(GameObjectOrder.MoveTo, Game.CursorPos);
-                gapCloseE(Game.CursorPos.To2D());
+                fleeToMouse();
             }
+
+            if (Program.Menu.Item("saveDash").GetValue<KeyBind>().Active && canSave)
+            {
+                saveLastDash();
+                canSave = false;
+            }
+            else
+            {
+                canSave = true;
+            }
+
+            if (Program.Menu.Item("deleteDash").GetValue<KeyBind>().Active && canDelete)
+            {
+                if(dashes.Count>0)
+                    dashes.RemoveAt(dashes.Count - 1);
+               canDelete = false;
+           }
+            else
+            {
+                canDelete = true;
+            }
+
+            if (Program.Menu.Item("exportDash").GetValue<KeyBind>().Active && canExport)
+            {
+                using (var file = new System.IO.StreamWriter(@"C:\Dashes.txt"))
+                {
+                    
+                    foreach (var dash in dashes)
+                    {
+                        string dashS = "dashes.Add(new YasDash(new Vector3(" + dash.from.X.ToString("0.00").Replace(',', '.') + "f," + dash.from.Y.ToString("0.00").Replace(',', '.') + "f," + dash.from.Z.ToString("0.00").Replace(',', '.') +
+                            "f),new Vector3(" + dash.to.X.ToString("0.00").Replace(',', '.') + "f," + dash.to.Y.ToString("0.00").Replace(',', '.') + "f," + dash.to.Z.ToString("0.00").Replace(',', '.') + "f)));";
+                        //new YasDash(new Vector3(X,Y,Z),new Vector3(X,Y,Z))
+
+                        file.WriteLine(dashS);
+                    }
+                    file.Close();
+                }
+
+                canExport = false;
+            }
+           else
+            {
+                canExport = true;
+             }
 
             if (Program.Menu.Item("useR_KS").GetValue<bool>())
             {
@@ -184,7 +420,7 @@ namespace FedAllChampionsUtility
         public static float getNewQSpeed()
         {
             float ds = 0.3f;//s
-            float a = 1 / ds * Yasuo.Player.AttackSpeedMod;
+            float a = 1 / ds * Player.AttackSpeedMod;
             return 1 / a;
         }
 
@@ -192,6 +428,8 @@ namespace FedAllChampionsUtility
         {
             Q.SetSkillshot(getNewQSpeed(), 50f, float.MaxValue, false, SkillshotType.SkillshotLine);
             if (target == null) return;
+
+            useHydra(target);
 
             if (Program.Menu.Item("smartR").GetValue<bool>() && R.IsReady())
                 useRSmart();
@@ -210,8 +448,7 @@ namespace FedAllChampionsUtility
                 gapCloseE(target.Position.To2D(), ignore);
             }
 
-            useQSmart(target);
-            useHydra(target);
+            useQSmart(target);            
         }
 
         public static Vector2 getNextPos(Obj_AI_Hero target)
@@ -712,6 +949,64 @@ namespace FedAllChampionsUtility
 
         }
 
+        public static bool interCir(Vector2 E, Vector2 L, Vector2 C, float r)
+        {
+            Vector2 d = L - E;
+            Vector2 f = E - C;
+
+            float a = Vector2.Dot(d, d);
+            float b = 2 * Vector2.Dot(f, d);
+            float c = Vector2.Dot(f, f) - r * r;
+
+            float discriminant = b * b - 4 * a * c;
+            if (discriminant < 0)
+            {
+                // no intersection
+            }
+            else
+            {
+                // ray didn't totally miss sphere,
+                // so there is a solution to
+                // the equation.
+
+                discriminant = (float)Math.Sqrt(discriminant);
+
+                // either solution may be on or off the ray so need to test both
+                // t1 is always the smaller value, because BOTH discriminant and
+                // a are nonnegative.
+                float t1 = (-b - discriminant) / (2 * a);
+                float t2 = (-b + discriminant) / (2 * a);
+
+                // 3x HIT cases:
+                //          -o->             --|-->  |            |  --|->
+                // Impale(t1 hit,t2 hit), Poke(t1 hit,t2>1), ExitWound(t1<0, t2 hit), 
+
+                // 3x MISS cases:
+                //       ->  o                     o ->              | -> |
+                // FallShort (t1>1,t2>1), Past (t1<0,t2<0), CompletelyInside(t1<0, t2>1)
+
+                if (t1 >= 0 && t1 <= 1)
+                {
+                    // t1 is the intersection, and it's closer than t2
+                    // (since t1 uses -b - discriminant)
+                    // Impale, Poke
+                    return true;
+                }
+
+                // here t1 didn't intersect so we are either started
+                // inside the sphere or completely past it
+                if (t2 >= 0 && t2 <= 1)
+                {
+                    // ExitWound
+                    return true;
+                }
+
+                // no intn: FallShort, Past, CompletelyInside
+                return false;
+            }
+            return false;
+        }
+
         public static float DistanceFromPointToLine(Vector2 l1, Vector2 l2, Vector2 point)
         {
             return Math.Abs((l2.X - l1.X) * (l1.Y - point.Y) - (l1.X - point.X) * (l2.Y - l1.Y)) /
@@ -750,12 +1045,12 @@ namespace FedAllChampionsUtility
                 Obj_SpellLineMissile missle = (Obj_SpellLineMissile)sender;
                 if (missle.SData.Name == "yasuowmovingwallmisl")
                 {
-                    Yasuo.wall.setL(missle);
+                    wall.setL(missle);
                 }
 
                 if (missle.SData.Name == "yasuowmovingwallmisr")
                 {
-                    Yasuo.wall.setR(missle);
+                    wall.setR(missle);
 
                 }
                 Console.WriteLine(missle.SData.Name);
@@ -791,6 +1086,7 @@ namespace FedAllChampionsUtility
             {
                 if (arg.SData.Name == "YasuoDashWrapper")//start dash
                 {
+                    lastDash.from = Player.Position;
                     isDashigPro = true;
                     castFrom = Player.Position;
                     startDash = Game.Time;
@@ -805,29 +1101,45 @@ namespace FedAllChampionsUtility
                 GamePacket gp = new GamePacket(args.PacketData);
 
                 gp.Position = 1;
-                if (gp.ReadInteger() == Yasuo.Player.NetworkId)
+                if (gp.ReadInteger() == Player.NetworkId)
                 {
-                    Yasuo.isDashigPro = false;
-                    Yasuo.time = Game.Time - Yasuo.startDash;
-                }
-                /* for (int i = 1; i < gp.Size() - 4; i++)
-                 {
-                     gp.Position = i;
-                     if (gp.ReadInteger() == Yasuo.Player.NetworkId)
-                     {
-                         Console.WriteLine("Found: "+i);
-                     }
-                 }
+                    lastDash.to = Player.Position;
+                    isDashigPro = false;
+                    time = Game.Time - startDash;
+                }                
+            }
+        }
 
-                 Console.WriteLine("End dash");
-                 Yasuo.Q.Cast(Yasuo.Player.Position);*/
+        private static void onDraw(EventArgs args)
+        {
+            if (Program.Menu.Item("disDraw").GetValue<bool>())
+                return;
+
+
+            Utility.DrawCircle(Player.Position, 475, Color.Blue);
+            Utility.DrawCircle(Player.Position, 1200, Color.Blue);
+
+
+            if (Program.Menu.Item("flee").GetValue<KeyBind>().Active)
+            {
+                Utility.DrawCircle(Game.CursorPos, 350, Color.Cyan);
+
+                Utility.DrawCircle(lastDash.from, 60, Color.BlueViolet);
+                Utility.DrawCircle(lastDash.to, 60, Color.BlueViolet);
+
+                foreach (YasDash dash in dashes)
+                {
+                    Utility.DrawCircle(dash.from, 60, Color.LawnGreen, 3, 4);
+                    Utility.DrawCircle(dash.to, 60, Color.LawnGreen, 3, 4);
+                }
+
             }
         }
 
         private static void OnGameSendPacket(GamePacketEventArgs args)
         {
 
-        }
+        }        
 
     }
 }

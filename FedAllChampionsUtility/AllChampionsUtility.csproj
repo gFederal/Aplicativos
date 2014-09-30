@@ -106,6 +106,7 @@
     <Compile Include="Champions\AdCarrys\Jinx.cs" />
     <Compile Include="Champions\MidLines\Karthus.cs" />
     <Compile Include="Champions\Jungles\Khazix.cs" />
+    <Compile Include="Utilitys\JungleTimers.cs" />
     <Compile Include="Utilitys\Killability.cs" />
     <Compile Include="Utilitys\LasthitMarker.cs" />
     <Compile Include="Champions\AdCarrys\Lucian.cs" />
@@ -196,6 +197,7 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Dashes.txt" />
     <Content Include="lol-icon.ico" />
     <None Include="Resources\Skull.png" />
     <None Include="App.config" />
