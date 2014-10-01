@@ -87,9 +87,7 @@ namespace FedAllChampionsUtility
             Program.Menu.AddSubMenu(new Menu("Farm", "Farm"));
             Program.Menu.SubMenu("Farm").AddItem(new MenuItem("UseQFarm", "Use Q Farm").SetValue(true));
             Program.Menu.SubMenu("Farm").AddItem(new MenuItem("UseEFarm", "Use E Farm").SetValue(true));
-            Program.Menu.SubMenu("Farm").AddItem(new MenuItem("ManaFarm", "Min Mana").SetValue(new Slider(60, 100, 0)));
-            Program.Menu.SubMenu("Farm").AddItem(new MenuItem("waveNumQ", "Minions to hit with Q").SetValue<Slider>(new Slider(3, 1, 10)));
-            Program.Menu.SubMenu("Farm").AddItem(new MenuItem("waveNumE", "Minions to hit with E").SetValue<Slider>(new Slider(4, 1, 10)));
+            Program.Menu.SubMenu("Farm").AddItem(new MenuItem("ManaFarm", "Min Mana").SetValue(new Slider(60, 100, 0)));           
             Program.Menu.SubMenu("Farm").AddItem(new MenuItem("LaneClearActive", "LaneClear!").SetValue(new KeyBind("V".ToCharArray()[0], KeyBindType.Press)));
 
             Program.Menu.AddSubMenu(new Menu("JungleFarm", "JungleFarm"));
