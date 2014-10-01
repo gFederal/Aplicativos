@@ -70,11 +70,13 @@
     <Compile Include="Champions\Jungles\Maokai.cs" />
     <Compile Include="Champions\Jungles\Amumu.cs" />
     <Compile Include="Champions\Jungles\Nocturne.cs" />
+    <Compile Include="Champions\MidLines\LeBlanc.cs" />
     <Compile Include="Champions\MidLines\TwistedFate.cs" />
     <Compile Include="Champions\MidLines\Yasuo.cs" />
     <Compile Include="Champions\MidLines\Azir.cs" />
     <Compile Include="Champions\Support\Annie.cs" />
     <Compile Include="Champions\TopLines\DrMundo.cs" />
+    <Compile Include="Champions\TopLines\Jax.cs" />
     <Compile Include="Geometrys.cs" />
     <Compile Include="Jump.cs" />
     <Compile Include="Map.cs" />
@@ -139,6 +141,7 @@
     <Compile Include="Champions\Support\Zyra.cs" />
     <Compile Include="Champions\MidLines\Ziggs.cs" />
     <Compile Include="Utilitys\Trinket.cs" />
+    <Compile Include="wJumper.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="clipper_library, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
