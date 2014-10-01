@@ -22,8 +22,8 @@ namespace FedAllChampionsUtility
         public static Spell E;
         public static Spell R;
 
-        private static SpellSlot IgniteSlot;
         private static SpellSlot SmiteSlot;
+        private static SpellSlot IgniteSlot;
 
         public static bool WActive = false;
 
@@ -47,8 +47,8 @@ namespace FedAllChampionsUtility
             E = new Spell(SpellSlot.E, Player.AttackRange + 25);
             R = new Spell(SpellSlot.R, Player.AttackRange + 25);
 
-            IgniteSlot = Player.GetSpellSlot("SummonerDot");
             SmiteSlot = Player.GetSpellSlot("SummonerSmite");
+            IgniteSlot = Player.GetSpellSlot("SummonerDot");
 
             Q.SetSkillshot(0.50f, 75f, 1500f, true, SkillshotType.SkillshotLine);
 
