@@ -22,12 +22,12 @@ namespace FedAllChampionsUtility
         public static Spell E;
         public static Spell R;
 
-        private static SpellSlot SmiteSlot;
-        private static SpellSlot IgniteSlot;
+        public static SpellSlot SmiteSlot;
+        public static SpellSlot IgniteSlot;
 
         public static bool WActive = false;
 
-        private static Obj_AI_Hero Player = ObjectManager.Player;
+        public static Obj_AI_Hero Player = ObjectManager.Player;
 
         public DrMundo()
         {
@@ -103,7 +103,7 @@ namespace FedAllChampionsUtility
             Program.Menu.SubMenu("Drawing").AddItem(dmgAfterComboItem);
         }
 
-        private static void Drawing_OnDraw(EventArgs args)
+        private void Drawing_OnDraw(EventArgs args)
         {
             if (Program.Menu.Item("Draw_Disabled").GetValue<bool>())
                 return;
@@ -113,7 +113,7 @@ namespace FedAllChampionsUtility
                     Utility.DrawCircle(ObjectManager.Player.Position, Q.Range, Q.IsReady() ? Color.Green : Color.Red);
         }
 
-        private static void Game_OnGameUpdate(EventArgs args)
+        private void Game_OnGameUpdate(EventArgs args)
         {
             if (Player.IsDead) return;
 
@@ -136,6 +136,10 @@ namespace FedAllChampionsUtility
                 }
             }
 
+            if (Program.Menu.Item("harassToggle").GetValue<KeyBind>().Active)
+            {
+                ToggleHarass();
+            }
 
             if (Program.Menu.Item("ComboActive").GetValue<KeyBind>().Active)
             {
@@ -144,22 +148,24 @@ namespace FedAllChampionsUtility
             else
             {
                 if (Program.Menu.Item("HarassActive").GetValue<KeyBind>().Active)
+                {
                     Harass();
-
-                if (Program.Menu.Item("harassToggle").GetValue<KeyBind>().Active)
-                    ToggleHarass();
+                }                
 
                 if (Program.Menu.Item("FreezeActive").GetValue<KeyBind>().Active)
                 {
                     FreezeFarm();
                 }
+
+                if (Program.Menu.Item("JungleFarmActive").GetValue<KeyBind>().Active)
+                {
+                    JungleFarm();
+                }
+
                 if (Program.Menu.Item("LaneClearActive").GetValue<KeyBind>().Active)
                 {
                     LaneClear();
-                }
-
-                if (Program.Menu.Item("JungleFarmActive").GetValue<KeyBind>().Active)
-                    JungleFarm();
+                }                
             }
 
             if (Program.Menu.Item("lifesave").GetValue<bool>())
@@ -172,7 +178,7 @@ namespace FedAllChampionsUtility
                 AutoSmite();            
         }
 
-        private static float GetComboDamage(Obj_AI_Base enemy)
+        private float GetComboDamage(Obj_AI_Base enemy)
         {
             var damage = 0d;
 
@@ -188,7 +194,7 @@ namespace FedAllChampionsUtility
             return (float)damage * 1;
         }        
 
-        private static void LifeSave()
+        private void LifeSave()
         {
             int inimigos = Utility.CountEnemysInRange(900);
 
@@ -198,7 +204,7 @@ namespace FedAllChampionsUtility
             }
         }
 
-        private static void Killsteal()
+        private void Killsteal()
         {
             int qRange = Program.Menu.Item("RangeQ").GetValue<Slider>().Value;
             var qTarget = SimpleTs.GetTarget(Q.Range + Q.Width, SimpleTs.DamageType.Magical);
@@ -212,7 +218,7 @@ namespace FedAllChampionsUtility
             }
         } 
 
-        private static void AutoSmite()
+        private void AutoSmite()
         {
             if (Program.Menu.Item("AutoSmite").GetValue<KeyBind>().Active)
             {
@@ -238,7 +244,7 @@ namespace FedAllChampionsUtility
             }
         }
 
-        private static void Combo()
+        private void Combo()
         {
             int qRange = Program.Menu.Item("RangeQ").GetValue<Slider>().Value;
 
@@ -248,7 +254,7 @@ namespace FedAllChampionsUtility
             {
                 PredictionOutput qPred = Q.GetPrediction(qTarget);
                 if (qPred.Hitchance >= HitChance.High)
-                    Q.Cast(qPred.CastPosition);
+                    Q.Cast(qPred.CastPosition, Packets());
             }
             if (!WActive && qTarget != null && Program.Menu.Item("UseWCombo").GetValue<bool>() && W.IsReady() && Player.Distance(qTarget) <= 300)
             {
@@ -260,7 +266,7 @@ namespace FedAllChampionsUtility
             }
         }
 
-        private static void Harass()
+        private void Harass()
         {
             var qTarget = SimpleTs.GetTarget(Q.Range + Q.Width, SimpleTs.DamageType.Magical);
 
@@ -273,11 +279,11 @@ namespace FedAllChampionsUtility
             {
                 PredictionOutput qPred = Q.GetPrediction(qTarget);
                 if (qPred.Hitchance >= HitChance.High)
-                    Q.Cast(qPred.CastPosition);
+                    Q.Cast(qPred.CastPosition, Packets());
             }
         }
 
-        private static void ToggleHarass()
+        private void ToggleHarass()
         {
             var qTarget = SimpleTs.GetTarget(Q.Range + Q.Width, SimpleTs.DamageType.Magical);
 
@@ -290,11 +296,11 @@ namespace FedAllChampionsUtility
             {
                 PredictionOutput qPred = Q.GetPrediction(qTarget);
                 if (qPred.Hitchance >= HitChance.High)
-                    Q.Cast(qPred.CastPosition);
+                    Q.Cast(qPred.CastPosition, Packets());
             }
         }
 
-        private static void FreezeFarm()
+        private void FreezeFarm()
         {
             var allMinionsQ = MinionManager.GetMinions(Player.ServerPosition, Q.Range + Q.Width + 30, MinionTypes.All, MinionTeam.NotAlly, MinionOrderTypes.Health);
 
@@ -309,7 +315,7 @@ namespace FedAllChampionsUtility
             }
         }
 
-        private static void LaneClear()
+        private void LaneClear()
         {
             var allMinionsQ = MinionManager.GetMinions(Player.ServerPosition, Q.Range + Q.Width + 30, MinionTypes.All, MinionTeam.NotAlly, MinionOrderTypes.Health);
             var allMinionsW = MinionManager.GetMinions(Player.ServerPosition, 350, MinionTypes.All, MinionTeam.NotAlly, MinionOrderTypes.Health);
@@ -335,23 +341,24 @@ namespace FedAllChampionsUtility
             }
         }
 
-        private static void JungleFarm()
+        private void JungleFarm()
         {
             var mobs = MinionManager.GetMinions(Player.ServerPosition, Q.Range,
                 MinionTypes.All,
                 MinionTeam.Neutral, MinionOrderTypes.MaxHealth);
+
             if (mobs.Count > 0)
             {
-                if (Q.IsReady())
-                {
+                if (Program.Menu.Item("UseQJFarm").GetValue<bool>() && Q.IsReady())
+                {                    
                     Q.Cast(mobs[0].Position);
                 }
-                if (!WActive && W.IsReady())
-                {
+                if (Program.Menu.Item("UseWJFarm").GetValue<bool>() && !WActive && W.IsReady())
+                {                    
                     W.Cast();
                 }
-                if (E.IsReady())
-                {
+                if (Program.Menu.Item("UseEJFarm").GetValue<bool>() && E.IsReady())
+                {                    
                     E.Cast();
                 }
             }

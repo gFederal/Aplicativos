@@ -296,7 +296,7 @@ namespace FedAllChampionsUtility
                         buff.Name == "threshqfakeknockup" || buff.Name == "VeigarStun" || buff.Name == "velkozestun" || buff.Name == "virdunkstun" || buff.Name == "viktorgravitonfieldstun" || buff.Name == "yasuoq3mis" ||
                         buff.Name == "zyragraspingrootshold" || buff.Name == "zyrabramblezoneknockup" || buff.Name == "katarinarsound" || buff.Name == "lissandrarself" || buff.Name == "AlZaharNetherGrasp" || buff.Name == "Meditate" ||
                         buff.Name == "missfortunebulletsound" || buff.Name == "AbsoluteZero" || buff.Name == "pantheonesound" || buff.Name == "VelkozR" || buff.Name == "infiniteduresssound" || buff.Name == "chronorevive" || 
-                        buff.Type == BuffType.Suppression)                   
+                        buff.Type == BuffType.Suppression || buff.Name == "aatroxpassivedeath" || buff.Name == "zacrebirthstart")                   
                     {
                         enemBuffs.Add(enem);
                         break;
@@ -377,7 +377,7 @@ namespace FedAllChampionsUtility
             // Revive
             if (Program.Menu.Item("autoRevW").GetValue<bool>())
             {
-                if (Trap.Name == "LifeAura.troy" || Trap.Name == "ZacPassiveExplosion.troy" || Trap.Name == "RebirthBlob" || Trap.Name.Contains("Passive_Death_Activate"))
+                if (Trap.Name == "LifeAura.troy")
                 {
                     if (Trap.IsEnemy) 
                     {
