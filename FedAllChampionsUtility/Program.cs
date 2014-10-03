@@ -71,6 +71,7 @@ namespace FedAllChampionsUtility
                 //var trinket = new Trinket();                
                 //var activator = new Activator();
                 var bushRevealer = new AutoRevelarMoita();
+                var revelar = new Revealer();
                 var baseult = new BaseUlt();
 
                 var trackerMenu = new Menu("Tracker", "Tracker");

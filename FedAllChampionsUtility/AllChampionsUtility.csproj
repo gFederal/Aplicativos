@@ -130,6 +130,7 @@
       <DependentUpon>Settings.settings</DependentUpon>
     </Compile>
     <Compile Include="Champions\TopLines\Riven.cs" />
+    <Compile Include="Utilitys\Revealer.cs" />
     <Compile Include="Utilitys\SkinChanger.cs" />
     <Compile Include="Champions\MidLines\Swain.cs" />
     <Compile Include="Champions\TopLines\Teemo.cs" />
