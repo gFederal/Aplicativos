@@ -40,7 +40,7 @@ namespace FedAllChampionsUtility
         private void Game_OnGameUpdate(EventArgs args)
         {
 
-            if (Program.Menu.Item("active").GetValue<KeyBind>().Active)
+            if (Program.Menu.Item("active").GetValue<bool>())
             {
                 foreach (var player in getEnemies())
                 {
