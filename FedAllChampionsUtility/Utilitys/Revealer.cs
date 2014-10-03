@@ -9,118 +9,125 @@ using SharpDX;
 using Color = System.Drawing.Color;
 
 namespace FedAllChampionsUtility
-{  
+{
 
     class Revealer
     {
-        public static Dictionary<String, String> dict;
-        public static Obj_AI_Base player = ObjectManager.Player;
-        public static Spell E;        
-        public static int VISION_WARD = 2043;
-        public static int TRINKET_RED = 3364;
-        public static float wardrange = 600f;
-        public static float trinket_range = 600f;
-        public static bool debug = false;
+        public static List<GameObject> wardList = new List<GameObject>();
+        public static List<GameObject> akaliShroud = new List<GameObject>(); 
 
         public Revealer()
         {            
-            Program.Menu.AddSubMenu(new Menu("Reveal", "Reveal"));
-            Program.Menu.SubMenu("Reveal").AddItem(new MenuItem("tb_sep0", "====== Settings"));
-            Program.Menu.SubMenu("Reveal").AddItem(new MenuItem("doRev", "Reveal").SetValue(true));
-            Program.Menu.SubMenu("Reveal").AddItem(new MenuItem("revDesc1", "Priority:"));
-            Program.Menu.SubMenu("Reveal").AddItem(new MenuItem("prior", "ON: Pink | OFF: Trinket").SetValue(true));
-            if (player.BaseSkinName == "LeeSin")
-            {
-                Program.Menu.SubMenu("Reveal").AddItem(new MenuItem("leeE", "Lee Sin: Use E").SetValue(true));
-                E = new Spell(SpellSlot.E, 350f);
-            }
-            Program.Menu.SubMenu("Reveal").AddItem(new MenuItem("tb_sep1", "========="));
-            
-            fillDict();           
-            
-            Game.OnGameUpdate += Game_GameUpdate;
-        } 
-
-        private void Game_GameUpdate(EventArgs args)
-        {
-            if (!isEn("doRev")) return;
-            foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(hero => hero.IsEnemy))
-            {
-                if (enemy.HasBuffOfType(BuffType.Invisibility) && !(enemy.BaseSkinName == "Evelynn"))
-                {
-                    Reveal(enemy);
-                }
-            }
-
+            Program.Menu.AddSubMenu(new Menu("Revealer", "Revealer"));
+            Program.Menu.SubMenu("Revealer").AddItem(new MenuItem("active", "Active!").SetValue(true));
+                        
+            Game.OnGameUpdate += Game_OnGameUpdate;
+            LeagueSharp.GameObject.OnCreate += GameObject_OnCreate;
         }
 
-        private void Reveal(Obj_AI_Hero enemy)
-        {
-            if (player.BaseSkinName == "LeeSin" && E.IsReady() && player.Distance(enemy) <= E.Range && isEn("leeE"))
-            {
-                E.Cast();
-            }
-            else
-            {
-                if (isEn("prior"))
-                {
-                    //W
-                    if (player.Distance(enemy) <= wardrange + 300f)
-                    {
-                        if (player.Distance(enemy) <= wardrange)
-                        {
-                            useItem(VISION_WARD, enemy.Position);
-                        }
-                        else
-                        {
-                            Vector3 pos1 = Vector3.Lerp(player.Position, enemy.Position, wardrange / player.Distance(enemy));
-                            useItem(VISION_WARD, pos1);
-                        }
 
+        static void GameObject_OnCreate(GameObject sender, EventArgs args)
+        {
+            if (sender.Name == "akali_smoke_bomb_tar_team_red.troy")
+            {
+                akaliShroud.Add(sender);
+            }
+            if (sender.Name == "VisionWard")
+            {
+                wardList.Add(sender);
+            }
+        }
+
+        static void Game_OnGameUpdate(EventArgs args)
+        {
+
+            if (Program.Menu.Item("active").GetValue<KeyBind>().Active)
+            {
+                foreach (var player in getEnemies())
+                {
+                    if (player.HasBuffOfType(BuffType.Invisibility) && player.BaseSkinName != "Evelynn")
+                    {
+                        if (Items.HasItem(3364) && Items.CanUseItem(3364))
+                        {
+                            if (ObjectManager.Player.Distance(player) < 900)
+                            {
+                                if (ObjectManager.Player.Distance(player) < 600)
+                                {
+                                    Items.UseItem(3364, ObjectManager.Player.Position);
+
+                                }
+                                else
+                                {
+                                    Items.UseItem(3364, Vector3.Lerp(ObjectManager.Player.Position, player.Position, 600 / ObjectManager.Player.Distance(player)));
+                                }
+                            }
+                        }
+                        else if (Items.HasItem(2043))
+                        {
+                            var castward = true;
+                            foreach (var ward in wardList)
+                            {
+                                if (ObjectManager.Player.Distance(ward.Position) < 600)
+                                {
+                                    castward = false;
+                                }
+                            }
+                            if (ObjectManager.Player.Distance(player) < 600 && castward)
+                            {
+                                Items.UseItem(2043, player.Position);
+                            }
+                        }
                     }
                 }
-                else
+                if (akaliShroud.Count > 0)
                 {
-                    //Trink
-                    if (player.Distance(enemy) <= trinket_range + 300f)
+                    foreach (var shroud in akaliShroud)
                     {
-                        if (player.Distance(enemy) <= trinket_range)
+                        if (Items.HasItem(3364) && Items.CanUseItem(3364))
                         {
-                            useItem(TRINKET_RED, enemy.Position);
-                        }
-                        else
-                        {
-                            Vector3 pos1 = Vector3.Lerp(player.Position, enemy.Position, trinket_range / player.Distance(enemy));
-                            useItem(TRINKET_RED, pos1);
-                        }
+                            if (ObjectManager.Player.Distance(shroud.Position) < 900)
+                            {
+                                if (ObjectManager.Player.Distance(shroud.Position) < 600)
+                                {
+                                    Items.UseItem(3364, ObjectManager.Player.Position);
+                                    akaliShroud.Remove(shroud);
 
+                                }
+                                else
+                                {
+                                    Items.UseItem(3364, Vector3.Lerp(ObjectManager.Player.Position, shroud.Position, 600 / ObjectManager.Player.Distance(shroud.Position)));
+                                    akaliShroud.Remove(shroud);
+                                }
+                            }
+                        }
+                        else if (Items.HasItem(2043))
+                        {
+                            var castward = true;
+                            foreach (var ward in wardList)
+                            {
+                                if (ObjectManager.Player.Distance(ward.Position) < 600)
+                                {
+                                    castward = false;
+                                }
+                            }
+                            if (ObjectManager.Player.Distance(shroud.Position) < 600 && castward)
+                            {
+                                Items.UseItem(2043, shroud.Position);
+                                akaliShroud.Remove(shroud);
+                            }
+                        }
                     }
                 }
-            }
 
-        }
-        private bool isEn(String item)
-        {
-            return Program.Menu.Item(item).GetValue<bool>();
-        }
-
-        private static void fillDict()
-        {
-            dict = new Dictionary<String, String>();
-            dict.Add("Vayne", "VayneTumbleFade");
-            dict.Add("Twitch", "TwitchHideInShadows");
-            dict.Add("Rengar", "RengarR");
-            dict.Add("MonkeyKing", "monkeykingdecoystealth");
-            dict.Add("Khazix", "khazixrstealth");
-            dict.Add("Talon", "talonshadowassaultbuff");
-            dict.Add("Akali", "akaliwstealth");
-        }
-        private void useItem(int id, Vector3 position)
-        {
-            if (Items.HasItem(id) && Items.CanUseItem(id))
-            {
-                Items.UseItem(id, position);
             }
         }
+
+        public static IEnumerable<Obj_AI_Hero> getEnemies()
+        {
+            var enemies = from enemy in ObjectManager.Get<Obj_AI_Hero>()
+                          where !enemy.IsAlly && ObjectManager.Player.Distance(enemy) < 2000
+                          select enemy;
+            return enemies;
+        }        
     }
 }
