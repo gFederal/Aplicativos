@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using LeagueSharp;
 using LeagueSharp.Common;
 
@@ -12,7 +14,11 @@ namespace FedAllChampionsUtility
 		public static Orbwalking.Orbwalker Orbwalker;
         public static Azir.Orbwalking.Orbwalker Azirwalker;
         public static Helper Helper;
-        public static Map map;       
+        public static Map map;
+
+        public static IEnumerable<Obj_AI_Hero> AllHeros = ObjectManager.Get<Obj_AI_Hero>();
+        public static IEnumerable<Obj_AI_Hero> AllHerosFriend = ObjectManager.Get<Obj_AI_Hero>().Where(hero => hero.IsAlly);
+        public static IEnumerable<Obj_AI_Hero> AllHerosEnemy = ObjectManager.Get<Obj_AI_Hero>().Where(hero => hero.IsEnemy);
         
 
         private static void Main(string[] args)
@@ -60,10 +66,10 @@ namespace FedAllChampionsUtility
                 var autolevelspells = new AutoLevelSpells();
                 var lasthitmarker = new LasthitMarker();
                 var enemmyrange = new EnemmyRange();
-                var potionManager = new PotionManager();
+                //var potionManager = new PotionManager();
                 //var killability = new Killability();
-                var trinket = new Trinket();                
-                var activator = new Activator();
+                //var trinket = new Trinket();                
+                //var activator = new Activator();
                 var bushRevealer = new AutoRevelarMoita();
                 var baseult = new BaseUlt();
 
@@ -71,7 +77,10 @@ namespace FedAllChampionsUtility
                 Tracker.AddtoMenu(trackerMenu);
 
                 var trackerward = new Menu("Ward Tracker", "Ward Tracker");
-                WardTracker.AttachToMenu(trackerward);               
+                WardTracker.AttachToMenu(trackerward);
+
+                var activatorMenu = new Menu("Activator", "Activator");
+                Activator.AddtoMenu(activatorMenu);
 
                 try
                 {

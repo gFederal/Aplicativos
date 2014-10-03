@@ -86,7 +86,7 @@
     <Compile Include="Champions\Support\Sona.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Protect.cs" />
-    <Compile Include="Utilitys\Ativador.cs" />
+    <Compile Include="Utilitys\Activator.cs" />
     <Compile Include="Champions\MidLines\Ahri.cs" />
     <Compile Include="Champions\AdCarrys\Ashe.cs" />
     <Compile Include="Utilitys\AutoLevelSpells.cs" />
@@ -99,6 +99,7 @@
     <Compile Include="Utilitys\DamageCalculator.cs" />
     <Compile Include="Champions\AdCarrys\Draven.cs" />
     <Compile Include="Champions\Jungles\Elise.cs" />
+    <Compile Include="Utilitys\Database.cs" />
     <Compile Include="Utilitys\DisconnectAlerter.cs" />
     <Compile Include="Utilitys\EnemmyRange.cs" />
     <Compile Include="Champions\AdCarrys\Ezreal.cs" />
