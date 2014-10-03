@@ -140,7 +140,9 @@
     <Compile Include="Champions\MidLines\Zed.cs" />
     <Compile Include="Champions\Support\Zyra.cs" />
     <Compile Include="Champions\MidLines\Ziggs.cs" />
+    <Compile Include="Utilitys\Tracker.cs" />
     <Compile Include="Utilitys\Trinket.cs" />
+    <Compile Include="Utilitys\WardTracker.cs" />
     <Compile Include="wJumper.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -202,6 +204,28 @@
   <ItemGroup>
     <Content Include="Dashes.txt" />
     <Content Include="lol-icon.ico" />
+    <None Include="Resources\Minimap_Ward_Pink_Enemy.png" />
+    <None Include="Resources\Minimap_Ward_Green_Enemy.png" />
+    <None Include="Resources\W CD.jpg" />
+    <None Include="Resources\Teleport CD2.jpg" />
+    <None Include="Resources\RightBar2.png" />
+    <None Include="Resources\R CD.jpg" />
+    <None Include="Resources\Q CD.jpg" />
+    <None Include="Resources\Healthbar Tracker2.png" />
+    <None Include="Resources\Healthbar Tracker Others.png" />
+    <None Include="Resources\E CD.jpg" />
+    <None Include="Resources\CD smite.jpg" />
+    <None Include="Resources\CD revive.JPG" />
+    <None Include="Resources\CD mana aswell dunno lol.jpg" />
+    <None Include="Resources\CD ignite.JPG" />
+    <None Include="Resources\CD heal.jpg" />
+    <None Include="Resources\CD ghost.JPG" />
+    <None Include="Resources\CD garrison.JPG" />
+    <None Include="Resources\CD flash.JPG" />
+    <None Include="Resources\CD exhaust.JPG" />
+    <None Include="Resources\CD cleanse.jpg" />
+    <None Include="Resources\CD clairvoyance.jpg" />
+    <None Include="Resources\CD barrier.jpg" />
     <None Include="Resources\Skull.png" />
     <None Include="App.config" />
   </ItemGroup>

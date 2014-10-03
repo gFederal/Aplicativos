@@ -12,7 +12,7 @@ namespace FedAllChampionsUtility
 		public static Orbwalking.Orbwalker Orbwalker;
         public static Azir.Orbwalking.Orbwalker Azirwalker;
         public static Helper Helper;
-        public static Map map;
+        public static Map map;       
         
 
         private static void Main(string[] args)
@@ -34,7 +34,7 @@ namespace FedAllChampionsUtility
             { */
 
                 Helper = new Helper();
-                map = new Map();
+                map = new Map();               
 
                 Menu = new Menu("FedAllChampionsUtility", "FedAllChampionsUtility_" + ObjectManager.Player.ChampionName, true);
 
@@ -66,6 +66,12 @@ namespace FedAllChampionsUtility
                 var activator = new Activator();
                 var bushRevealer = new AutoRevelarMoita();
                 var baseult = new BaseUlt();
+
+                var trackerMenu = new Menu("Tracker", "Tracker");
+                Tracker.AddtoMenu(trackerMenu);
+
+                var trackerward = new Menu("Ward Tracker", "Ward Tracker");
+                WardTracker.AttachToMenu(trackerward);               
 
                 try
                 {

@@ -118,7 +118,73 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
+  <data name="CD_barrier" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\CD barrier.jpg;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="CD_clairvoyance" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\CD clairvoyance.jpg;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="CD_cleanse" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\CD cleanse.jpg;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="CD_exhaust" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\CD exhaust.JPG;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="CD_flash" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\CD flash.JPG;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="CD_garrison" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\CD garrison.JPG;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="CD_ghost" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\CD ghost.JPG;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="CD_heal" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\CD heal.jpg;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="CD_ignite" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\CD ignite.JPG;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="CD_mana_aswell_dunno_lol" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\CD mana aswell dunno lol.jpg;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="CD_revive" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\CD revive.JPG;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="CD_smite" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\CD smite.jpg;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="E_CD" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\E CD.jpg;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Healthbar_Tracker2" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Healthbar Tracker2.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Healthbar_Tracker_Others" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Healthbar Tracker Others.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Minimap_Ward_Green_Enemy" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Minimap_Ward_Green_Enemy.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Minimap_Ward_Pink_Enemy" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Minimap_Ward_Pink_Enemy.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Q_CD" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Q CD.jpg;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="RightBar2" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\RightBar2.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="R_CD" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\R CD.jpg;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
   <data name="Skull" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\Skull.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Teleport_CD2" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Teleport CD2.jpg;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="W_CD" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\W CD.jpg;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
 </root>
