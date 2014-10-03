@@ -1,17 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Windows.Input;
+using System.Text;
+using System.Threading.Tasks;
 using LeagueSharp;
 using LeagueSharp.Common;
 using SharpDX;
 
-using Color = System.Drawing.Color;
-
 namespace FedAllChampionsUtility
 {
 
-    class Revealer
+    internal class Revealer
     {
         public static List<GameObject> wardList = new List<GameObject>();
         public static List<GameObject> akaliShroud = new List<GameObject>(); 
@@ -26,7 +25,7 @@ namespace FedAllChampionsUtility
         }
 
 
-        static void GameObject_OnCreate(GameObject sender, EventArgs args)
+        private void GameObject_OnCreate(GameObject sender, EventArgs args)
         {
             if (sender.Name == "akali_smoke_bomb_tar_team_red.troy")
             {
@@ -38,7 +37,7 @@ namespace FedAllChampionsUtility
             }
         }
 
-        static void Game_OnGameUpdate(EventArgs args)
+        private void Game_OnGameUpdate(EventArgs args)
         {
 
             if (Program.Menu.Item("active").GetValue<KeyBind>().Active)
@@ -122,7 +121,7 @@ namespace FedAllChampionsUtility
             }
         }
 
-        public static IEnumerable<Obj_AI_Hero> getEnemies()
+        private IEnumerable<Obj_AI_Hero> getEnemies()
         {
             var enemies = from enemy in ObjectManager.Get<Obj_AI_Hero>()
                           where !enemy.IsAlly && ObjectManager.Player.Distance(enemy) < 2000
