@@ -19,8 +19,7 @@ namespace FedAllChampionsUtility
 
         public void PluginLoaded()
         {            
-            Chat.Print("Fed" + ObjectManager.Player.ChampionName + " Loaded!");            
-            Chat.Print("Enjoy!");            
+            Chat.Print("Fed" + ObjectManager.Player.ChampionName + " Loaded!"); 
         }
 
 		public bool Packets()
@@ -31,7 +30,9 @@ namespace FedAllChampionsUtility
 		public void MenuBasics()
 		{
 			Program.Menu.AddSubMenu(new Menu("Packet Setting", "Packets"));
-			Program.Menu.SubMenu("Packets").AddItem(new MenuItem("usePackets", "Enable Packets").SetValue(true));
+            Program.Menu.SubMenu("Packets").AddItem(new MenuItem("Packets_sep0", "===== Settings"));
+            Program.Menu.SubMenu("Packets").AddItem(new MenuItem("usePackets", "= Use Packets").SetValue(true));
+            Program.Menu.SubMenu("Packets").AddItem(new MenuItem("Packets_sep1", "========="));
 
 			Program.Menu.Item("Orbwalk").DisplayName = "TeamFight";
 			Program.Menu.Item("Farm").DisplayName = "Harass";

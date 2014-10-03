@@ -22,9 +22,13 @@ namespace FedAllChampionsUtility
         
 
         private static void Main(string[] args)
-		{            
-            CustomEvents.Game.OnGameLoad += Game_OnGameLoad;
-                        
+		{
+            Game.PrintChat("======  Federal Utilitys Loaded! ======");
+            Game.PrintChat("Beta version v 1.0");
+            Game.PrintChat("This is a Beta version, not all is active,");
+            Game.PrintChat("=================================");
+
+            CustomEvents.Game.OnGameLoad += Game_OnGameLoad;                        
 		}	
         
         private static void Game_OnGameLoad(EventArgs args)
@@ -70,8 +74,7 @@ namespace FedAllChampionsUtility
                 //var killability = new Killability();
                 //var trinket = new Trinket();                
                 //var activator = new Activator();
-                var bushRevealer = new AutoRevelarMoita();
-                var revelar = new Revealer();
+                var bushRevealer = new AutoRevelarMoita();                
                 var baseult = new BaseUlt();
 
                 var trackerMenu = new Menu("Tracker", "Tracker");
@@ -79,6 +82,8 @@ namespace FedAllChampionsUtility
 
                 var trackerward = new Menu("Ward Tracker", "Ward Tracker");
                 WardTracker.AttachToMenu(trackerward);
+
+                var revelar = new Revealer();
 
                 var activatorMenu = new Menu("Activator", "Activator");
                 Activator.AddtoMenu(activatorMenu);
