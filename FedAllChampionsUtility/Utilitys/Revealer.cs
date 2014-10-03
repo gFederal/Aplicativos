@@ -11,7 +11,7 @@ using Color = System.Drawing.Color;
 namespace FedAllChampionsUtility
 {  
 
-    internal class Revealer
+    class Revealer
     {
         public static Dictionary<String, String> dict;
         public static Obj_AI_Base player = ObjectManager.Player;
