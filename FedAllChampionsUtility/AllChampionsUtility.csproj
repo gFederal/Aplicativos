@@ -64,6 +64,7 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CardSelector.cs" />
     <Compile Include="Champions\AdCarrys\Caitlyn.cs" />
     <Compile Include="Champions\AdCarrys\Twitch.cs" />
     <Compile Include="Champions\Jungles\LeeSin.cs" />
