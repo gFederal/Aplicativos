@@ -1,59 +1,85 @@
-﻿using System;
+﻿#region
+
+using System;
+using System.Collections.Generic;
+using System.Data;
+using System.Drawing;
 using System.Linq;
+using System.Runtime.Remoting.Messaging;
 using LeagueSharp;
 using LeagueSharp.Common;
+using SharpDX;
 using Color = System.Drawing.Color;
+#endregion
 
 namespace FedAllChampionsUtility
 {
     class TwistedFate : Champion
     {
-        public Spell Q;
-        public Spell W;
-        public Spell R;
+        private static Spell Q, W, E, R;
+        private static float Qangle = 28 * (float)Math.PI / 180;
 
-        public int CardPickTick;
+        private static Vector2 PingLocation;
+        private static int LastPingT = 0;
+        
         public TwistedFate()
         {
             LoadMenu();
             LoadSpells();
 
-            Drawing.OnDraw += Drawing_OnDraw;
             Game.OnGameUpdate += Game_OnGameUpdate;
+            Drawing.OnDraw += Drawing_OnDraw;
+            Drawing.OnEndScene += DrawingOnOnEndScene;
+            Obj_AI_Hero.OnProcessSpellCast += Obj_AI_Hero_OnProcessSpellCast;
+            Orbwalking.BeforeAttack += OrbwalkingOnBeforeAttack;
+           
             PluginLoaded();
         }
 
         private void LoadMenu()
         {
-            Program.Menu.AddSubMenu(new Menu("TeamFight", "TeamFight"));
-            Program.Menu.SubMenu("TeamFight").AddItem(new MenuItem("useQ_TeamFight", "Use Q").SetValue(new StringList(new[] { "Not", "OnStun", "Always" }, 2)));
-            Program.Menu.SubMenu("TeamFight").AddItem(new MenuItem("useW_TeamFight", "Use W").SetValue(true));
+            /* Q */
+            Program.Menu.AddSubMenu(new Menu("Q - Wildcards", "Q"));            
+            Program.Menu.SubMenu("Q").AddItem(new MenuItem("AutoQI", "Auto-Q immobile").SetValue(true));
+            Program.Menu.SubMenu("Q").AddItem(new MenuItem("AutoQD", "Auto-Q dashing").SetValue(true));            
 
-            Program.Menu.AddSubMenu(new Menu("Harass", "Harass"));
-            Program.Menu.SubMenu("Harass").AddItem(new MenuItem("useQ_Harass", "Use Q").SetValue(new StringList(new[] { "Not", "OnStun", "Always" }, 1)));
-            Program.Menu.SubMenu("Harass").AddItem(new MenuItem("useW_Harass", "Use W").SetValue(true));
+            /* W */
+            Program.Menu.AddSubMenu(new Menu("W - Pick a card", "W"));
+            Program.Menu.SubMenu("W").AddItem(new MenuItem("SelectYellow", "Select Yellow").SetValue(new KeyBind("W".ToCharArray()[0], KeyBindType.Press)));
+            Program.Menu.SubMenu("W").AddItem(new MenuItem("SelectBlue", "Select Blue").SetValue(new KeyBind("E".ToCharArray()[0], KeyBindType.Press)));
+            Program.Menu.SubMenu("W").AddItem(new MenuItem("SelectRed", "Select Red").SetValue(new KeyBind("T".ToCharArray()[0], KeyBindType.Press)));
 
-            Program.Menu.AddSubMenu(new Menu("LaneClear", "LaneClear"));
-            Program.Menu.SubMenu("LaneClear").AddItem(new MenuItem("useQ_LaneClear", "Use Q").SetValue(true));
-            Program.Menu.SubMenu("LaneClear").AddItem(new MenuItem("useW_LaneClear", "Use W").SetValue(true));
+            Program.Menu.AddSubMenu(new Menu("R - Destiny", "R"));
+            Program.Menu.SubMenu("R").AddItem(new MenuItem("AutoY", "Select yellow card after R").SetValue(true));           
+                        
+            Program.Menu.AddSubMenu(new Menu("Misc", "Misc"));
+            Program.Menu.SubMenu("Misc").AddItem(new MenuItem("PingLH", "Ping low health enemies (Only local)").SetValue(true));            
 
-            Program.Menu.AddSubMenu(new Menu("LastHit", "LastHit"));
-            Program.Menu.SubMenu("LastHit").AddItem(new MenuItem("useW_LastHit", "Use W").SetValue(true));
+            //Damage after combo:
+            var dmgAfterComboItem = new MenuItem("DamageAfterCombo", "Draw damage after combo").SetValue(true);
+            Utility.HpBarDamageIndicator.DamageToUnit = ComboDamage;
+            Utility.HpBarDamageIndicator.Enabled = dmgAfterComboItem.GetValue<bool>();
+            dmgAfterComboItem.ValueChanged += delegate(object sender, OnValueChangeEventArgs eventArgs)
+            {
+                Utility.HpBarDamageIndicator.Enabled = eventArgs.GetNewValue<bool>();
+            };
 
-            Program.Menu.AddSubMenu(new Menu("Passive", "Passive"));
-            Program.Menu.SubMenu("Passive").AddItem(new MenuItem("use_CardPick", "Cardpick").SetValue(new StringList(new[] { "Smart", "Gold", "Blue", "Red" })));
+            /*Drawing*/
+            Program.Menu.AddSubMenu(new Menu("Drawings", "Drawings"));
+            Program.Menu.SubMenu("Drawings").AddItem(new MenuItem("Qcircle", "Q Range").SetValue(new Circle(true, Color.FromArgb(100, 255, 0, 255))));
+            Program.Menu.SubMenu("Drawings").AddItem(new MenuItem("Rcircle", "R Range").SetValue(new Circle(true, Color.FromArgb(100, 255, 255, 255))));
+            Program.Menu.SubMenu("Drawings").AddItem(new MenuItem("Rcircle2", "R Range (minimap)").SetValue(new Circle(true, Color.FromArgb(255, 255, 255, 255))));
+            Program.Menu.SubMenu("Drawings").AddItem(dmgAfterComboItem);
 
-            Program.Menu.AddSubMenu(new Menu("Drawing", "Drawing"));
-            Program.Menu.SubMenu("Drawing").AddItem(new MenuItem("Draw_Disabled", "Disable All").SetValue(false));
-            Program.Menu.SubMenu("Drawing").AddItem(new MenuItem("Draw_Q", "Draw Q").SetValue(true));
-            Program.Menu.SubMenu("Drawing").AddItem(new MenuItem("Draw_R", "Draw R").SetValue(true));
+            Program.Menu.AddSubMenu(new Menu("Keys", "Keys"));
+            Program.Menu.SubMenu("Keys").AddItem(new MenuItem("Combo", "Combo").SetValue(new KeyBind(32, KeyBindType.Press)));            
 
         }
 
         private void LoadSpells()
         {
             Q = new Spell(SpellSlot.Q, 1450);
-            Q.SetSkillshot(0.25f, 40, 1000, false, SkillshotType.SkillshotLine);
+            Q.SetSkillshot(0.25f, 40f, 1000f, false, SkillshotType.SkillshotLine);
 
             W = new Spell(SpellSlot.W, 1000);
             W.SetSkillshot(0.3f, 80f, 1600, true, SkillshotType.SkillshotLine);
@@ -61,185 +87,234 @@ namespace FedAllChampionsUtility
             R = new Spell(SpellSlot.R, 5500);
         }
 
-        private void Game_OnGameUpdate(EventArgs args)
+        private static void Ping(Vector2 position)
         {
-            if (ObjectManager.Player.Spellbook.GetSpell(SpellSlot.R).Name == "gate")
-                CastUltGoldCard();
+            if (Environment.TickCount - LastPingT < 30 * 1000) return;
+            LastPingT = Environment.TickCount;
+            PingLocation = position;
+            SimplePing();
+            Utility.DelayAction.Add(150, SimplePing);
+            Utility.DelayAction.Add(300, SimplePing);
+            Utility.DelayAction.Add(400, SimplePing);
+            Utility.DelayAction.Add(800, SimplePing);
+        }
 
-            switch (Program.Orbwalker.ActiveMode)
+        private static void SimplePing()
+        {
+            Packet.S2C.Ping.Encoded(new Packet.S2C.Ping.Struct(PingLocation.X, PingLocation.Y, 0, 0, Packet.PingType.FallbackSound)).Process();
+        }
+
+        private static void OrbwalkingOnBeforeAttack(Orbwalking.BeforeAttackEventArgs args)
+        {
+            if(args.Target is Obj_AI_Hero)
+                args.Process = CardSelector.Status != SelectStatus.Selecting && Environment.TickCount - CardSelector.LastWSent > 300;
+        }
+
+        static void Obj_AI_Hero_OnProcessSpellCast(Obj_AI_Base sender, GameObjectProcessSpellCastEventArgs args)
+        {
+            if (sender.IsMe && args.SData.Name == "gate" && Program.Menu.Item("AutoY").GetValue<bool>())
             {
-                case Orbwalking.OrbwalkingMode.Combo:
-                    UseQTeamfight();
-                    if (Program.Menu.Item("useW_TeamFight").GetValue<bool>())
-                        CastW();
-                    break;
-                case Orbwalking.OrbwalkingMode.Mixed:
-                    UseQHarass();
-                    if (Program.Menu.Item("useW_Harass").GetValue<bool>())
-                        CastW();
-                    break;
-                case Orbwalking.OrbwalkingMode.LaneClear:
-                    if (Program.Menu.Item("useQ_LaneClear").GetValue<bool>())
-                        Cast_BasicLineSkillshot_AOE_Farm(Q);
-                    if (Program.Menu.Item("useW_LaneClear").GetValue<bool>())
-                        CastW();
-                    break;
-                case Orbwalking.OrbwalkingMode.LastHit:
-                    if (Program.Menu.Item("useW_LastHit").GetValue<bool>())
-                        CastW();
-                    break;
+                CardSelector.StartSelecting(Cards.Yellow);
             }
         }
 
-        private void CastUltGoldCard()
+        private static void DrawingOnOnEndScene(EventArgs args)
         {
-            if (!W.IsReady())
-                return;
-            if (Environment.TickCount - CardPickTick < 250)
-                return;
-            CardPickTick = Environment.TickCount;
-            if (ObjectManager.Player.Spellbook.GetSpell(SpellSlot.W).Name == "PickACard")
-                W.Cast();
-            PickGold();
-        }
-
-        private void CastW()
-        {
-            if (!W.IsReady())
-                return;
-            if (Environment.TickCount - CardPickTick < 250)
-                return;
-            CardPickTick = Environment.TickCount;
-            if (ObjectManager.Player.Spellbook.GetSpell(SpellSlot.W).Name == "PickACard")
-                W.Cast();
-            PickaCard();
-        }
-
-        private void PickaCard()
-        {
-            switch (Program.Menu.Item("use_CardPick").GetValue<StringList>().SelectedIndex)
+            var rCircle2 = Program.Menu.Item("Rcircle2").GetValue<Circle>();
+            if (rCircle2.Active)
             {
-                case 0:
-                    SmartPick();
-                    return;
-                case 1:
-                    PickGold();
-                    break;
-                case 2:
-                    PickBlue();
-                    break;
-                case 3:
-                    PickRed();
-                    break;
+                Utility.DrawCircle(ObjectManager.Player.Position, 5500, rCircle2.Color, 1, 23, true);
             }
         }
 
-        private void SmartPick()
+        static void Drawing_OnDraw(EventArgs args)
         {
-            switch (Program.Orbwalker.ActiveMode)
+            var qCircle = Program.Menu.Item("Qcircle").GetValue<Circle>();
+            var rCircle = Program.Menu.Item("Rcircle").GetValue<Circle>();
+            
+            if (qCircle.Active)
             {
-                case Orbwalking.OrbwalkingMode.Mixed:
-                    if (ObjectManager.Player.Mana / ObjectManager.Player.MaxMana * 100 <= 70)
-                        PickBlue();
-                    else
+                Utility.DrawCircle(ObjectManager.Player.Position, Q.Range, qCircle.Color);
+            }
+
+            if (rCircle.Active)
+            {
+                Utility.DrawCircle(ObjectManager.Player.Position, 5500, rCircle.Color);
+            }
+        }
+
+
+        private static int CountHits(Vector2 position, List<Vector2> points, List<int> hitBoxes)
+        {
+            var result = 0;
+
+            var startPoint = ObjectManager.Player.ServerPosition.To2D();
+            var originalDirection = Q.Range*(position - startPoint).Normalized();
+            var originalEndPoint = startPoint + originalDirection;
+
+            for (var i = 0; i < points.Count; i++)
+            {
+                var point = points[i];
+
+                for (var k = 0; k < 3; k++)
+                {
+                    var endPoint = new Vector2();
+                    if (k == 0) endPoint = originalEndPoint;
+                    if (k == 1) endPoint = startPoint + originalDirection.Rotated(Qangle);
+                    if (k == 2) endPoint = startPoint + originalDirection.Rotated(-Qangle);
+
+                    if (point.Distance(startPoint, endPoint, true, true) <
+                        (Q.Width + hitBoxes[i])*(Q.Width + hitBoxes[i]))
                     {
-                        PickRed();
-                        PickGold();
+                        result++;
+                        break;
                     }
-                    break;
-                case Orbwalking.OrbwalkingMode.Combo:
-                    if (ObjectManager.Player.Mana / ObjectManager.Player.MaxMana * 100 <= 20)
-                        PickBlue();
-                    else
-                        PickGold();
-                    break;
-                case Orbwalking.OrbwalkingMode.LaneClear:
-                    if (ObjectManager.Player.Mana / ObjectManager.Player.MaxMana * 100 <= 60)
-                        PickBlue();
-                    else
-                        PickRed();
-                    break;
-                case Orbwalking.OrbwalkingMode.LastHit:
-                    PickBlue();
-                    break;
+                }
             }
+
+            return result;
         }
 
-        private void PickGold()
+        private static void CastQ(Obj_AI_Base unit, Vector2 unitPosition, int minTargets = 0)
         {
-            if (ObjectManager.Player.Spellbook.GetSpell(SpellSlot.W).Name == "goldcardlock")
-                W.Cast();
-        }
+            var points = new List<Vector2>();
+            var hitBoxes = new List<int>();
 
-        private void PickRed()
-        {
-            if (ObjectManager.Player.Spellbook.GetSpell(SpellSlot.W).Name == "redcardlock")
-                W.Cast();
-        }
+            var startPoint = ObjectManager.Player.ServerPosition.To2D();
+            var originalDirection = Q.Range*(unitPosition - startPoint).Normalized();
 
-        private void PickBlue()
-        {
-            if (ObjectManager.Player.Spellbook.GetSpell(SpellSlot.W).Name == "bluecardlock")
-                W.Cast();
-        }
-
-        private void UseQHarass()
-        {
-            if (!Q.IsReady())
-                return;
-            switch (Program.Menu.Item("useQ_Harass").GetValue<StringList>().SelectedIndex)
+            foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>())
             {
-                case 0:
-                    return;
-                case 1:
-                    foreach (var enemy in Program.Helper.EnemyTeam.Where(hero => (hero.HasBuffOfType(BuffType.Snare) || hero.HasBuffOfType(BuffType.Stun) && hero.IsValidTarget(Q.Range))))
+                if (enemy.IsValidTarget() && enemy.NetworkId != unit.NetworkId)
+                {
+                    var pos = Q.GetPrediction(enemy);
+                    if (pos.Hitchance >= HitChance.Medium)
                     {
-                        Q.Cast(enemy, Packets());
-                        return;
+                        points.Add(pos.UnitPosition.To2D());
+                        hitBoxes.Add((int) enemy.BoundingRadius);
                     }
-                    break;
-                case 2:
-                    Cast_BasicLineSkillshot_Enemy(Q, SimpleTs.DamageType.Magical);
-                    break;
+                }
             }
-        }
 
-        private void UseQTeamfight()
-        {
-            if (!Q.IsReady())
-                return;
-            switch (Program.Menu.Item("useQ_TeamFight").GetValue<StringList>().SelectedIndex)
+
+            var posiblePositions = new List<Vector2>();
+
+            for (var i = 0; i < 3; i++)
             {
-                case 0:
-                    return;
-                case 1:
-                    foreach (var enemy in Program.Helper.EnemyTeam.Where(hero => (hero.HasBuffOfType(BuffType.Snare) || hero.HasBuffOfType(BuffType.Stun) && hero.IsValidTarget(Q.Range))))
-                    {
-                        Q.Cast(enemy, Packets());
-                        return;
-                    }
-                    break;
-                case 2:
-                    Cast_BasicLineSkillshot_Enemy(Q, SimpleTs.DamageType.Magical);
-                    break;
+                if (i == 0) posiblePositions.Add(unitPosition + originalDirection.Rotated(0));
+                if (i == 1) posiblePositions.Add(startPoint + originalDirection.Rotated(Qangle));
+                if (i == 2) posiblePositions.Add(startPoint + originalDirection.Rotated(-Qangle));
             }
-        }
 
-        private void Drawing_OnDraw(EventArgs args)
-        {
-            if (Program.Menu.Item("Draw_Disabled").GetValue<bool>())
+
+            if (startPoint.Distance(unitPosition) < 900)
+            {
+                for (var i = 0; i < 3; i++)
+                {
+                    var pos = posiblePositions[i];
+                    var direction = (pos - startPoint).Normalized().Perpendicular();
+                    var k = (2/3*(unit.BoundingRadius + Q.Width));
+                    posiblePositions.Add(startPoint - k*direction);
+                    posiblePositions.Add(startPoint + k*direction);
+                }
+            }
+
+            var bestPosition = new Vector2();
+            var bestHit = -1;
+
+            foreach (var position in posiblePositions)
+            {
+                var hits = CountHits(position, points, hitBoxes);
+                if (hits > bestHit)
+                {
+                    bestPosition = position;
+                    bestHit = hits;
+                }
+            }
+
+            if (bestHit + 1 <= minTargets)
                 return;
 
-            if (Program.Menu.Item("Draw_Q").GetValue<bool>())
-                if (Q.Level > 0)
-                    Utility.DrawCircle(ObjectManager.Player.Position, Q.Range, Q.IsReady() ? Color.Green : Color.Red);
-
-            if (Program.Menu.Item("Draw_R").GetValue<bool>())
-                if (R.Level > 0)
-                    Utility.DrawCircle(ObjectManager.Player.Position, R.Range, R.IsReady() ? Color.Green : Color.Red);
-
+            Q.Cast(bestPosition.To3D(), true);
         }
 
+        private static float ComboDamage(Obj_AI_Hero hero)
+        {   
+            var dmg = 0d;
+            dmg += ObjectManager.Player.GetSpellDamage(hero, SpellSlot.Q) * 2;
+            dmg += ObjectManager.Player.GetSpellDamage(hero, SpellSlot.W);
+            dmg += ObjectManager.Player.GetSpellDamage(hero, SpellSlot.Q);
 
+
+            if (Items.HasItem("ItemBlackfireTorch"))
+            {
+                dmg += ObjectManager.Player.GetItemDamage(hero, Damage.DamageItems.Dfg);
+                dmg = dmg * 1.2;
+            }
+
+            if(ObjectManager.Player.GetSpellSlot("SummonerIgnite") != SpellSlot.Unknown)
+            {
+                dmg += ObjectManager.Player.GetSummonerSpellDamage(hero, Damage.SummonerSpell.Ignite);
+            }
+
+            return (float) dmg;
+        }
+
+        private static void Game_OnGameUpdate(EventArgs args)
+        {
+            if (Program.Menu.Item("PingLH").GetValue<bool>())
+                foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(h => ObjectManager.Player.Spellbook.CanUseSpell(SpellSlot.R) == SpellState.Ready && h.IsValidTarget() && ComboDamage(h) > h.Health))
+                {
+                    Ping(enemy.Position.To2D());
+                }
+
+            var combo = Program.Menu.Item("Combo").GetValue<KeyBind>().Active;
+
+            //Select cards.
+            if (Program.Menu.Item("SelectYellow").GetValue<KeyBind>().Active ||
+                combo)
+            {
+                CardSelector.StartSelecting(Cards.Yellow);
+            }
+
+            if (Program.Menu.Item("SelectBlue").GetValue<KeyBind>().Active)
+            {
+                CardSelector.StartSelecting(Cards.Blue);
+            }
+
+            if (Program.Menu.Item("SelectRed").GetValue<KeyBind>().Active)
+            {
+                CardSelector.StartSelecting(Cards.Red);
+            }
+
+            if (CardSelector.Status == SelectStatus.Selected && combo)
+            {
+                var target = Program.Orbwalker.GetTarget();
+                if (target.IsValidTarget() && target is Obj_AI_Hero && Items.HasItem("DeathfireGrasp") && ComboDamage((Obj_AI_Hero)target) >= target.Health)
+                {
+                    Items.UseItem("DeathfireGrasp", (Obj_AI_Hero) target);
+                }
+            }
+
+
+            //Auto Q
+            var autoQI = Program.Menu.Item("AutoQI").GetValue<bool>();
+            var autoQD = Program.Menu.Item("AutoQD").GetValue<bool>();
+
+            
+            if (ObjectManager.Player.Spellbook.CanUseSpell(SpellSlot.Q) == SpellState.Ready && (autoQD || autoQI))
+                foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>())
+                {
+                    if (enemy.IsValidTarget(Q.Range * 2))
+                    {
+                        var pred = Q.GetPrediction(enemy);
+                        if ((pred.Hitchance == HitChance.Immobile && autoQI) ||
+                            (pred.Hitchance == HitChance.Dashing && autoQD))
+                        {
+                            CastQ(enemy, pred.UnitPosition.To2D());
+                        }
+                    }
+                }
+        }
     }
-}
+}   
