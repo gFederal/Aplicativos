@@ -35,10 +35,10 @@ namespace FedAllChampionsUtility
         private void LoadSpells()
         {
             Q = new Spell(SpellSlot.Q);
-            W = new Spell(SpellSlot.W, 1200);
+            W = new Spell(SpellSlot.W, 1150);
             R = new Spell(SpellSlot.R);
 
-            W.SetSkillshot(0.5f, (float)WAngle, 2000f, false, SkillshotType.SkillshotCone);
+            W.SetSkillshot(0.25f, 100, 1600f, false, SkillshotType.SkillshotCone);
             R.SetSkillshot(0.3f, 250f, 1600f, false, SkillshotType.SkillshotLine);
         }
 
@@ -46,35 +46,42 @@ namespace FedAllChampionsUtility
         {
             Program.Menu.AddSubMenu(new Menu("Combo", "Combo"));
             Program.Menu.SubMenu("Combo").AddItem(new MenuItem("UseQ", "Use Q").SetValue(true));
-            Program.Menu.SubMenu("Combo").AddItem(new MenuItem("UseW", "Use W").SetValue(true));
+            Program.Menu.SubMenu("Combo").AddItem(new MenuItem("UseWCombo", "Use W").SetValue(true));
             Program.Menu.SubMenu("Combo").AddItem(new MenuItem("UseR", "Use R").SetValue(true));
             
             Program.Menu.AddSubMenu(new Menu("Harass", "Harass"));            
-            Program.Menu.SubMenu("Harass").AddItem(new MenuItem("UseW", "Use W").SetValue(true));
+            Program.Menu.SubMenu("Harass").AddItem(new MenuItem("UseWHarass", "Use W").SetValue(true));
 
             Program.Menu.AddSubMenu(new Menu("Misc", "Misc"));
             Program.Menu.SubMenu("Misc").AddItem(new MenuItem("interrupt", "Interrupt spells").SetValue(true));
             Program.Menu.SubMenu("Misc").AddItem(new MenuItem("antigapcloser", "Anti-Gapscloser").SetValue(true));           
-        }
+        }        
 
-        private static void AntiGapcloser_OnEnemyGapcloser(ActiveGapcloser gapcloser)
+        private void AntiGapcloser_OnEnemyGapcloser(ActiveGapcloser gapcloser)
         {
-            if (R.IsReady() && Program.Menu.Item("antigapcloser").GetValue<bool>() && Vector3.Distance(gapcloser.Sender.Position, player.Position) < 1000)
+            if (Program.Menu.Item("antigapcloser").GetValue<bool>() && Vector3.Distance(gapcloser.Sender.Position, player.Position) < 1000)
             {
-                R.Cast(gapcloser.End, true);
+                if (R.IsReady())
+                {
+                    R.Cast(gapcloser.End, Packets());
+                }
+                else
+                {
+                    W.Cast(gapcloser.End, Packets());
+                }
             }
         }       
-        private static void Interrupter_OnPossibleToInterrupt(Obj_AI_Base unit, InterruptableSpell spell)
+        private void Interrupter_OnPossibleToInterrupt(Obj_AI_Base unit, InterruptableSpell spell)
         {
             if (R.IsReady() &&
                 Vector3.Distance(player.Position, unit.Position) < 1000 &&
                 Program.Menu.Item("interrupt").GetValue<bool>() &&
                 spell.DangerLevel >= InterruptableDangerLevel.Medium)
             {
-                R.Cast(unit.Position, true);
+                R.Cast(unit.Position, Packets());
             }
         }
-        private static void Game_OnGameUpdate(EventArgs args)
+        private void Game_OnGameUpdate(EventArgs args)
         {
             // Combo
             if (Program.Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo)
@@ -84,31 +91,37 @@ namespace FedAllChampionsUtility
             if (Program.Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Mixed)
                 Harass();
         }
-        private static void Combo()
+        private void Combo()
         {
-            bool useW = W.IsReady() && Program.Menu.Item("UseW").GetValue<bool>();
+            bool useW = W.IsReady() && Program.Menu.Item("UseWCombo").GetValue<bool>();
             bool useR = R.IsReady() && Program.Menu.Item("UseR").GetValue<bool>();
             Obj_AI_Hero targetW = SimpleTs.GetTarget(W.Range, SimpleTs.DamageType.Physical);
             Obj_AI_Hero targetR = SimpleTs.GetTarget(700, SimpleTs.DamageType.Magical);
             if (useW)
             {
-                W.CastIfHitchanceEquals(targetW, HitChance.Medium);
+                PredictionOutput wPred = W.GetPrediction(targetW);
+                if (wPred.Hitchance >= HitChance.High)
+                    W.Cast(wPred.CastPosition, Packets());
             }
             if (useR)
             {
-                R.CastIfHitchanceEquals(targetR, HitChance.High);
+                PredictionOutput rPred = R.GetPrediction(targetR);
+                if (rPred.Hitchance >= HitChance.High)
+                    R.Cast(rPred.CastPosition, Packets());
             }
         }
-        private static void Harass()
+        private void Harass()
         {
-            bool useW = W.IsReady() && Program.Menu.Item("UseW").GetValue<bool>();
+            bool useW = W.IsReady() && Program.Menu.Item("UseWHarass").GetValue<bool>();
             Obj_AI_Hero targetW = SimpleTs.GetTarget(W.Range, SimpleTs.DamageType.Physical);
             if (useW)
             {
-                W.CastIfHitchanceEquals(targetW, HitChance.Medium);
+                PredictionOutput wPred = W.GetPrediction(targetW);
+                if (wPred.Hitchance >= HitChance.High)
+                    W.Cast(wPred.CastPosition, Packets());
             }
         }
-        private static void OnSendPacket(GamePacketEventArgs args)
+        private void OnSendPacket(GamePacketEventArgs args)
         {
             if (!Program.Menu.Item("UseQ").GetValue<bool>()) return;
             if (args.PacketData[0] == Packet.C2S.Move.Header && Packet.C2S.Move.Decoded(args.PacketData).SourceNetworkId == player.NetworkId && Packet.C2S.Move.Decoded(args.PacketData).MoveType == 3)

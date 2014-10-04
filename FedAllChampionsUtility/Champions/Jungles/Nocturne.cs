@@ -1,9 +1,7 @@
 ﻿#region
 
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Windows.Input;
 using LeagueSharp;
 using LeagueSharp.Common;
 using SharpDX;
@@ -39,7 +37,9 @@ namespace FedAllChampionsUtility
             E = new Spell(SpellSlot.E, 425f);
             R = new Spell(SpellSlot.R, 25000f);
 
-            Q.SetSkillshot(0.25f, 60f, 1600f, false, SkillshotType.SkillshotLine);            
+            Q.SetSkillshot(0.25f, 60f, 1600f, false, SkillshotType.SkillshotLine);
+            E.SetTargetted(0.5f, 1700f);
+            R.SetTargetted(0.75f, 2500f);
         }
 
         private void LoadMenu()
@@ -125,7 +125,7 @@ namespace FedAllChampionsUtility
 
             if (R.IsReady() && Program.Menu.Item("useR_Killableping").GetValue<bool>())
             {
-                foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(h => h.IsValidTarget(GetRRange()) && !h.IsDead && EnemmylowHP(Program.Menu.Item("HPR").GetValue<Slider>().Value, GetRRange())))
+                foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(h => h.IsValidTarget(GetRRange()) && !h.IsDead && EnemylowHP(Program.Menu.Item("HPR").GetValue<Slider>().Value, GetRRange())))
                 {
                     Ping(enemy.Position.To2D());
                 }
@@ -185,7 +185,7 @@ namespace FedAllChampionsUtility
             var rTarget = SimpleTs.GetTarget(GetRRange(), SimpleTs.DamageType.Physical);
             if (R.IsReady() && rTarget != null)
             {
-                if (ObjectManager.Player.Distance(rTarget) > 1100 && EnemmylowHP(Program.Menu.Item("HPR").GetValue<Slider>().Value, GetRRange()))
+                if (ObjectManager.Player.Distance(rTarget) > 1100 && EnemylowHP(Program.Menu.Item("HPR").GetValue<Slider>().Value, GetRRange()))
                 {
                     R.Cast();
                     R.CastOnUnit(rTarget, Packets());
@@ -193,11 +193,13 @@ namespace FedAllChampionsUtility
             }  
         }
         private void Combo()
-        {
+        {            
+            var eTarget = SimpleTs.GetTarget(E.Range - 30, SimpleTs.DamageType.Physical); 
             var rTarget = SimpleTs.GetTarget(GetRRange(), SimpleTs.DamageType.Physical);
+
             if (R.IsReady() && Program.Menu.Item("UseRCombo").GetValue<bool>())
             {
-                if (ObjectManager.Player.Distance(rTarget) > 1100 && EnemmylowHP(Program.Menu.Item("UseRHP").GetValue<Slider>().Value, GetRRange()))
+                if (ObjectManager.Player.Distance(rTarget) > 1100 && EnemylowHP(Program.Menu.Item("UseRHP").GetValue<Slider>().Value, GetRRange()))
                 {
                     R.Cast();
                     R.CastOnUnit(rTarget, Packets());
@@ -208,8 +210,7 @@ namespace FedAllChampionsUtility
             {
                 Cast_BasicLineSkillshot_Enemy(Q);
             }
-
-            var eTarget = SimpleTs.GetTarget(E.Range - 30, SimpleTs.DamageType.Physical);
+            
             if (E.IsReady() && Program.Menu.Item("UseECombo").GetValue<bool>())
             {
                 Cast_onEnemy(E);
@@ -253,7 +254,7 @@ namespace FedAllChampionsUtility
 
                 if (Q.IsReady() && Program.Menu.Item("UseQJFarm").GetValue<bool>())
                 {
-                    Q.Cast(mob);
+                    Q.Cast(mob.Position);
                 }
                 if (W.IsReady() && Program.Menu.Item("UseWJFarm").GetValue<bool>())
                 {
@@ -261,24 +262,13 @@ namespace FedAllChampionsUtility
                 }
                 if (E.IsReady() && Program.Menu.Item("UseEJFarm").GetValue<bool>())
                 {
-                    E.Cast(mob);
+                    E.CastOnUnit(mob);
                 }
             }
         }
-        private bool EnemmylowHP(int percentHP, float range)
-        {            
-            foreach (var enemmy in ObjectManager.Get<Obj_AI_Hero>())
-            {
-                if (enemmy.IsEnemy && !enemmy.IsDead)
-                {
-                    if (Vector3.Distance(ObjectManager.Player.Position, enemmy.Position) < range && ((enemmy.Health / enemmy.MaxHealth) * 100) < percentHP)
-                    {
-                        return true;
-                    }
-                }
-            }
-
-            return false;
+        private bool EnemylowHP(int percentHP, float range)
+        {
+            return ObjectManager.Get<Obj_AI_Hero>().Where(enemmy => enemmy.IsEnemy && !enemmy.IsDead).Any(enemmy => Vector3.Distance(ObjectManager.Player.Position, enemmy.Position) < range && ((enemmy.Health / enemmy.MaxHealth) * 100) < percentHP);
         }
         private void Ping(Vector2 position)
         {
@@ -327,8 +317,16 @@ namespace FedAllChampionsUtility
         {
             if (!Program.Menu.Item("InterruptSpells").GetValue<bool>())
                 return;
+
             if (ObjectManager.Player.Distance(unit) < E.Range && E.IsReady() && unit.IsEnemy)
+            {
+                if (W.IsReady())
+                {
+                    W.CastOnUnit(ObjectManager.Player);
+                }
+
                 E.CastOnUnit(unit, Packets());
+            }
         }
         
     }
