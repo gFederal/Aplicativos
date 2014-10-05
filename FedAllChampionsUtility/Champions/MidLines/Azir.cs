@@ -542,8 +542,7 @@ namespace FedAllChampionsUtility
                 private readonly Obj_AI_Hero _player;
                 private readonly Menu _config;
                 private Obj_AI_Base _forcedTarget;
-                private Vector3 _orbwalkingPoint;
-                private Obj_AI_Minion _prevMinion;
+                private Vector3 _orbwalkingPoint;                
                 public Orbwalker(Menu attachToMenu)
                 {
                     _config = attachToMenu;

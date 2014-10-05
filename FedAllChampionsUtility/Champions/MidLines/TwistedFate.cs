@@ -16,7 +16,7 @@ namespace FedAllChampionsUtility
 {
     class TwistedFate : Champion
     {
-        private static Spell Q, W, E, R;
+        private static Spell Q, W, R;
         private static float Qangle = 28 * (float)Math.PI / 180;
 
         private static Vector2 PingLocation;
@@ -72,8 +72,7 @@ namespace FedAllChampionsUtility
             Program.Menu.SubMenu("Drawings").AddItem(dmgAfterComboItem);
 
             Program.Menu.AddSubMenu(new Menu("Keys", "Keys"));
-            Program.Menu.SubMenu("Keys").AddItem(new MenuItem("Combo", "Combo").SetValue(new KeyBind(32, KeyBindType.Press)));            
-
+            Program.Menu.SubMenu("Keys").AddItem(new MenuItem("Combo", "Combo").SetValue(new KeyBind(32, KeyBindType.Press))); 
         }
 
         private void LoadSpells()
