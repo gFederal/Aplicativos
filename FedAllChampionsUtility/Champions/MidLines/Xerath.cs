@@ -109,7 +109,6 @@ namespace FedAllChampionsUtility
 
         private void Game_OnGameUpdate(EventArgs args)
         {
-
             R_Check();
 
             switch (Program.Orbwalker.ActiveMode)

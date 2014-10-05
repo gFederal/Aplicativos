@@ -111,6 +111,7 @@
     <Compile Include="Champions\AdCarrys\Jinx.cs" />
     <Compile Include="Champions\MidLines\Karthus.cs" />
     <Compile Include="Champions\Jungles\Khazix.cs" />
+    <Compile Include="Utilitys\jTimer.cs" />
     <Compile Include="Utilitys\JungleTimers.cs" />
     <Compile Include="Utilitys\Killability.cs" />
     <Compile Include="Utilitys\LasthitMarker.cs" />

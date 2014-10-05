@@ -15,6 +15,7 @@ namespace FedAllChampionsUtility
         public static Azir.Orbwalking.Orbwalker Azirwalker;
         public static Helper Helper;
         public static Map map;
+        public static jJungleTimers jungler;
 
         public static IEnumerable<Obj_AI_Hero> AllHeros = ObjectManager.Get<Obj_AI_Hero>();
         public static IEnumerable<Obj_AI_Hero> AllHerosFriend = ObjectManager.Get<Obj_AI_Hero>().Where(hero => hero.IsAlly);
@@ -44,7 +45,8 @@ namespace FedAllChampionsUtility
             { */
 
                 Helper = new Helper();
-                map = new Map();               
+                map = new Map();
+                jungler = new jJungleTimers();
 
                 Menu = new Menu("FedAllChampionsUtility", "FedAllChampionsUtility_" + ObjectManager.Player.ChampionName, true);
 

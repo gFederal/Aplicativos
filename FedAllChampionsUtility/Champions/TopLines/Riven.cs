@@ -1,11 +1,16 @@
-﻿using System;
+﻿#region
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using Color = System.Drawing.Color;
+using System.Windows.Input;
 using LeagueSharp;
 using LeagueSharp.Common;
 using SharpDX;
+using Color = System.Drawing.Color;
+
+
+#endregion
 
 namespace FedAllChampionsUtility
 {
@@ -22,12 +27,12 @@ namespace FedAllChampionsUtility
     class Riven : Champion
 	{
         public static Obj_AI_Hero Player = ObjectManager.Player;
-        public static Spellbook sBook = Player.Spellbook;        
+        public static Spellbook sBook = Player.Spellbook; 
 
-        public static Spell _q = new Spell(SpellSlot.Q, 260);
-        public static Spell _w = new Spell(SpellSlot.W, 250);
-        public static Spell _e = new Spell(SpellSlot.E, 325);
-        public static Spell _r = new Spell(SpellSlot.R, 900);
+        public static Spell Q;
+        public static Spell W;
+        public static Spell E;
+        public static Spell R;
         public static Items.Item _tiamat = new Items.Item(3077, 400);
         public static Items.Item _tiamat2 = new Items.Item(3074, 400);
         public static Items.Item _ghostblade = new Items.Item(3142, 600);        
@@ -64,10 +69,10 @@ namespace FedAllChampionsUtility
 
 		public Riven()
 		{
-			LoadMenu();
-			LoadSpells();
+            if (Utility.Map.GetMap()._MapType == Utility.Map.MapType.SummonersRift) IsSR = true;
 
-            
+            LoadMenu();
+			LoadSpells();            
 
             Orbwalking.BeforeAttack += BeforeAttack;
             Obj_AI_Base.OnProcessSpellCast += OnProcessSpell;
@@ -75,9 +80,11 @@ namespace FedAllChampionsUtility
             Game.OnGameUpdate += OnGameUpdate;
             Game.OnGameUpdate += Buffs_GameUpdate;
             Game.OnGameProcessPacket += OnGameProcessPacket;
-            //Drawing.OnDraw += OnDraw;
+            Drawing.OnDraw += OnDraw;
             AntiGapcloser.OnEnemyGapcloser += OnEnemyGapCloser;
             Interrupter.OnPossibleToInterrupt += OnPossibleToInterrupt;
+
+            if (IsSR) Game.OnGameUpdate += Wallhopper_OnGameUpdate;
 
 			PluginLoaded();
 		}
@@ -105,8 +112,7 @@ namespace FedAllChampionsUtility
             Program.Menu.SubMenu("Misc").AddItem(new MenuItem("AntiGapcloser", "Auto W Gapclosers").SetValue(true));
             Program.Menu.SubMenu("Misc").AddItem(new MenuItem("Interrupt", "Auto W Interruptible Spells").SetValue(true));
             Program.Menu.SubMenu("Misc").AddItem(new MenuItem("QKeepAlive", "Keep Q Alive").SetValue(true));
-            Program.Menu.SubMenu("Draw").AddItem(new MenuItem("DrawRanges", "Draw engage range").SetValue(new Circle(true, Color.FromKnownColor(System.Drawing.KnownColor.Green))));
-            Program.Menu.SubMenu("Draw").AddItem(new MenuItem("DrawTarget", "Draw current target").SetValue(new Circle(true, Color.FromKnownColor(System.Drawing.KnownColor.Red))));
+            Program.Menu.SubMenu("Draw").AddItem(new MenuItem("DrawRanges", "Draw engage range").SetValue(true));            
 
             if (IsSR)
             {
@@ -121,10 +127,13 @@ namespace FedAllChampionsUtility
 
 		private void LoadSpells()
 		{
+            Q = new Spell(SpellSlot.Q, 260);
+            W = new Spell(SpellSlot.W, 250);
+            E = new Spell(SpellSlot.E, 325);
+            R = new Spell(SpellSlot.R, 900);
 
-            _r.SetSkillshot(0.25f, 60f, 2200, false, SkillshotType.SkillshotCone);
-            _e.SetSkillshot(0, 0, 1450, false, SkillshotType.SkillshotLine);
-
+            R.SetSkillshot(0.25f, 60f, 2200, false, SkillshotType.SkillshotCone);
+            E.SetSkillshot(0, 0, 1450, false, SkillshotType.SkillshotLine);
 		}
 
         private static void Buffs_GameUpdate(EventArgs args)
@@ -176,40 +185,36 @@ namespace FedAllChampionsUtility
 
         private static void OnDraw(EventArgs args)
         {
-            if (Program.Menu.SubMenu("Draw").Item("DrawRanges").GetValue<Circle>().Active)
+            if (Program.Menu.Item("DrawRanges").GetValue<bool>())
             {
-                Utility.DrawCircle(Player.Position, (Program.Menu.SubMenu("Combo").Item("UseQGapClose").GetValue<bool>() ? _q.Range + _e.Range : _e.Range), Program.Menu.SubMenu("Draw").Item("DrawRanges").GetValue<Circle>().Color);
+                if (Q.Level > 0)
+                Utility.DrawCircle(Player.Position, Q.Range + E.Range, Q.IsReady() ? Color.Green : Color.Red);
+                
             }
-            if (IsSR && (Program.Menu.SubMenu("Draw").Item("DrawJumps").GetValue<bool>() || Program.Menu.SubMenu("Draw").Item("DrawJumps2").GetValue<KeyBind>().Active))
+            if (IsSR && (Program.Menu.Item("DrawJumps").GetValue<bool>() || Program.Menu.Item("DrawJumps2").GetValue<KeyBind>().Active))
             {
                 foreach (WallHopPosition pos in jumpPositions)
                 {
 
-                    if (Player.Distance(pos.pA) <= Program.Menu.SubMenu("Draw").Item("DrawJumpsRange").GetValue<Slider>().Value || Player.Distance(pos.pB) <= Program.Menu.SubMenu("Draw").Item("DrawJumpsRange").GetValue<Slider>().Value)
+                    if (Player.Distance(pos.pA) <= Program.Menu.Item("DrawJumpsRange").GetValue<Slider>().Value || Player.Distance(pos.pB) <= Program.Menu.Item("DrawJumpsRange").GetValue<Slider>().Value)
                     {
-                        Utility.DrawCircle(pos.pA, minRange, System.Drawing.Color.Green);
-                        Utility.DrawCircle(pos.pB, minRange, System.Drawing.Color.GreenYellow);
+                        Utility.DrawCircle(pos.pA, minRange, Color.Green);
+                        Utility.DrawCircle(pos.pB, minRange, Color.GreenYellow);
                     }
                 }
-            }
-            if (Program.Menu.SubMenu("Draw").Item("DrawTarget").GetValue<Circle>().Active)
-            {
-                Utility.DrawCircle(currentTarget.ServerPosition, currentTarget.BoundingRadius + 10, Program.Menu.SubMenu("Draw").Item("DrawTarget").GetValue<Circle>().Color, 5);
-                Utility.DrawCircle(currentTarget.ServerPosition, currentTarget.BoundingRadius + 25, Program.Menu.SubMenu("Draw").Item("DrawTarget").GetValue<Circle>().Color, 6);
-                Utility.DrawCircle(currentTarget.ServerPosition, currentTarget.BoundingRadius + 45, Program.Menu.SubMenu("Draw").Item("DrawTarget").GetValue<Circle>().Color, 7);
-            }
+            }            
         }
 
-        public static void OnEnemyGapCloser(ActiveGapcloser gapcloser)
+        private void OnEnemyGapCloser(ActiveGapcloser gapcloser)
         {
-            if (_w.IsReady() && gapcloser.Sender.IsValidTarget(_w.Range) && Program.Menu.SubMenu("Misc").Item("AntiGapcloser").GetValue<bool>())
-                _w.Cast();
+            if (W.IsReady() && gapcloser.Sender.IsValidTarget(W.Range) && Program.Menu.SubMenu("Misc").Item("AntiGapcloser").GetValue<bool>())
+                W.Cast();
         }
 
         public static void OnPossibleToInterrupt(Obj_AI_Base unit, InterruptableSpell spell)
         {
-            if (_w.IsReady() && unit.IsValidTarget(_w.Range) && Program.Menu.SubMenu("Misc").Item("Interrupt").GetValue<bool>())
-                _w.Cast();
+            if (W.IsReady() && unit.IsValidTarget(W.Range) && Program.Menu.SubMenu("Misc").Item("Interrupt").GetValue<bool>())
+                W.Cast();
         }
 
         private static void Wallhopper_OnGameUpdate(EventArgs args)
@@ -258,7 +263,7 @@ namespace FedAllChampionsUtility
                 if (currentTarget == null)
                     AcquireTarget();
 
-                if (currentTarget != null && (currentTarget.IsDead || !currentTarget.IsVisible || !currentTarget.IsValidTarget(_e.Range + _q.Range + Player.AttackRange)))
+                if (currentTarget != null && (currentTarget.IsDead || !currentTarget.IsVisible || !currentTarget.IsValidTarget(E.Range + Q.Range + Player.AttackRange)))
                     Program.Orbwalker.SetMovement(true);
 
                 if (currentTarget == null)
@@ -271,7 +276,7 @@ namespace FedAllChampionsUtility
                 if (currentTarget.IsDead)
                     AcquireTarget();
 
-                if (!currentTarget.IsValidTarget(_e.Range + _q.Range + Player.AttackRange))
+                if (!currentTarget.IsValidTarget(E.Range + Q.Range + Player.AttackRange))
                     AcquireTarget();
 
 
@@ -288,7 +293,7 @@ namespace FedAllChampionsUtility
                 Program.Orbwalker.SetMovement(true);
                 if (!IsRecalling && qCount != 0 && lastQCast + (3650 - Game.Ping / 2) < Environment.TickCount && Program.Menu.SubMenu("Misc").Item("QKeepAlive").GetValue<bool>())
                 {
-                    _q.Cast(Game.CursorPos, true);
+                    Q.Cast(Game.CursorPos, true);
                 }
             }
         }
@@ -297,16 +302,16 @@ namespace FedAllChampionsUtility
         {
             foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(hero => hero.Team != Player.Team))
             {
-                if (_w.IsReady() && enemy.IsValidTarget(_w.Range) && Program.Menu.SubMenu("Misc").SubMenu("AutoStun").Item("Stun" + enemy.ChampionName).GetValue<bool>())
+                if (W.IsReady() && enemy.IsValidTarget(W.Range) && Program.Menu.SubMenu("Misc").SubMenu("AutoStun").Item("Stun" + enemy.ChampionName).GetValue<bool>())
                 {
-                    _w.Cast();
+                    W.Cast();
                 }
             }
         }
 
         private static void AcquireTarget()
         {
-            currentTarget = SimpleTs.GetTarget(_e.Range + _q.Range + Player.AttackRange, SimpleTs.DamageType.Physical);
+            currentTarget = SimpleTs.GetTarget(E.Range + Q.Range + Player.AttackRange, SimpleTs.DamageType.Physical);
         }
 
         public static void BeforeAttack(Orbwalking.BeforeAttackEventArgs args)
@@ -319,13 +324,13 @@ namespace FedAllChampionsUtility
         public static void Combo(Obj_AI_Base target)
         {
             var noRComboDmg = DamageCalcNoR(target);
-            if (_r.IsReady() && !ultiReady && noRComboDmg < target.Health && Program.Menu.SubMenu("Combo").Item("UseUlti").GetValue<bool>())
+            if (R.IsReady() && !ultiReady && noRComboDmg < target.Health && Program.Menu.SubMenu("Combo").Item("UseUlti").GetValue<bool>())
             {
-                _r.Cast();
+                R.Cast();
             }
 
-            if (!(_tiamat.IsReady() || _tiamat2.IsReady()) && !_q.IsReady() && _w.IsReady() && currentTarget.IsValidTarget(_w.Range))
-                _w.Cast();
+            if (!(_tiamat.IsReady() || _tiamat2.IsReady()) && !Q.IsReady() && W.IsReady() && currentTarget.IsValidTarget(W.Range))
+                W.Cast();
 
             if (nextSpell == null && useTiamat == true)
             {
@@ -343,20 +348,20 @@ namespace FedAllChampionsUtility
                 Player.IssueOrder(GameObjectOrder.AttackUnit, currentTarget);
             }
 
-            if (nextSpell == _q)
+            if (nextSpell == Q)
             {
-                _q.Cast(target.Position, true);
+                Q.Cast(target.Position, true);
                 nextSpell = null;
             }
 
-            if (nextSpell == _w)
+            if (nextSpell == W)
             {
-                _w.Cast();
+                W.Cast();
             }
 
-            if (nextSpell == _e)
+            if (nextSpell == E)
             {
-                _e.Cast(currentTarget.ServerPosition);
+                E.Cast(currentTarget.ServerPosition);
             }
         }
 
@@ -389,14 +394,14 @@ namespace FedAllChampionsUtility
                             {
                                 _tiamat2.Cast();
                             }
-                            else if (_w.IsReady() && currentTarget.IsValidTarget(_w.Range) && qCount != 0)
+                            else if (W.IsReady() && currentTarget.IsValidTarget(W.Range) && qCount != 0)
                             {
 
-                                nextSpell = _w;
+                                nextSpell = W;
                             }
                             else
                             {
-                                nextSpell = _q;
+                                nextSpell = Q;
                             }
                             UseAttack = false;
                             Program.Orbwalker.SetMovement(true);
@@ -507,10 +512,10 @@ namespace FedAllChampionsUtility
         private static double GetRDamage(Obj_AI_Base target) // DamageLib doesn't do this correctly yet
         {
             var minDmg = 0.0;
-            if (_r.Level == 0)
+            if (R.Level == 0)
                 return 0.0;
 
-            minDmg = (80 + (40 * (_r.Level - 1))) + 0.6 * ((0.2 * (Player.BaseAttackDamage + Player.FlatPhysicalDamageMod)) + Player.FlatPhysicalDamageMod);
+            minDmg = (80 + (40 * (R.Level - 1))) + 0.6 * ((0.2 * (Player.BaseAttackDamage + Player.FlatPhysicalDamageMod)) + Player.FlatPhysicalDamageMod);
 
             var targetPercentHealthMissing = 100 * (1 - target.Health / target.MaxHealth);
             var dmg = 0.0;
@@ -530,27 +535,27 @@ namespace FedAllChampionsUtility
 
         private static double GetUltiQDamage(Obj_AI_Base target) // account for bonus ulti AD
         {
-            var dmg = 10 + ((_q.Level - 1) * 20) + 0.6 * (1.2 * (Player.BaseAttackDamage + Player.FlatPhysicalDamageMod));
+            var dmg = 10 + ((Q.Level - 1) * 20) + 0.6 * (1.2 * (Player.BaseAttackDamage + Player.FlatPhysicalDamageMod));
             return Damage.CalcDamage(Player, target, Damage.DamageType.Physical, dmg - 10);
         }
 
         private static double GetUltiWDamage(Obj_AI_Base target) // account for bonus ulti AD
         {
             var totalAD = Player.FlatPhysicalDamageMod + Player.BaseAttackDamage;
-            var dmg = 50 + ((_w.Level - 1) * 30) + (0.2 * totalAD + Player.FlatPhysicalDamageMod);
+            var dmg = 50 + ((W.Level - 1) * 30) + (0.2 * totalAD + Player.FlatPhysicalDamageMod);
             return Damage.CalcDamage(Player, target, Damage.DamageType.Physical, dmg - 10);
         }
 
         private static double GetQDamage(Obj_AI_Base target)
         {
             var totalAD = Player.FlatPhysicalDamageMod + Player.BaseAttackDamage;
-            var dmg = 10 + ((_q.Level - 1) * 20) + (0.35 + (Player.Level * 0.05)) * totalAD;
+            var dmg = 10 + ((Q.Level - 1) * 20) + (0.35 + (Player.Level * 0.05)) * totalAD;
             return Damage.CalcDamage(Player, target, Damage.DamageType.Physical, dmg - 10);
         }
 
         private static double GetWDamage(Obj_AI_Base target)
         {
-            var dmg = 50 + (_w.Level * 30) + Player.FlatPhysicalDamageMod;
+            var dmg = 50 + (W.Level * 30) + Player.FlatPhysicalDamageMod;
             return Damage.CalcDamage(Player, target, Damage.DamageType.Physical, dmg - 10);
         }
 
@@ -569,10 +574,10 @@ namespace FedAllChampionsUtility
             if (_tiamat.IsReady() || _tiamat2.IsReady())
                 tDamage = Damage.GetItemDamage(Player, target, Damage.DamageItems.Tiamat);
 
-            if (!_q.IsReady() && qCount == 0)
+            if (!Q.IsReady() && qCount == 0)
                 qDamage = 0.0;
 
-            if (!_w.IsReady())
+            if (!W.IsReady())
                 wDamage = 0.0;
 
             return wDamage + tDamage + (qDamage * (3 - qCount)) + (pDamage * (3 - qCount)) + aDamage * (3 - qCount);
@@ -594,13 +599,13 @@ namespace FedAllChampionsUtility
             if (_tiamat.IsReady() || _tiamat2.IsReady())
                 tDamage = Damage.GetItemDamage(Player, target, Damage.DamageItems.Tiamat);
 
-            if (!_q.IsReady() && qCount == 0)
+            if (!Q.IsReady() && qCount == 0)
                 qDamage = 0.0;
 
-            if (!_w.IsReady())
+            if (!W.IsReady())
                 wDamage = 0.0;
 
-            if (_r.IsReady())
+            if (R.IsReady())
                 rDamage = 0.0;
             return (pDamage * (3 - qCount)) + (aDamage * (3 - qCount)) + wDamage + tDamage + rDamage + (qDamage * (3 - qCount));
         }
@@ -645,7 +650,7 @@ namespace FedAllChampionsUtility
                     else if (SpellName == "RivenTriCleave")
                     {
                         nextSpell = null;
-                        lastSpell = _q;
+                        lastSpell = Q;
                         CancelAnimation();
                         if (Player.Distance(currentTarget.ServerPosition) + currentTarget.BoundingRadius < Player.AttackRange + Player.BoundingRadius)
                         {
@@ -653,8 +658,8 @@ namespace FedAllChampionsUtility
                             UseAttack = true;
                             return;
                         }
-                        if (_w.IsReady() && currentTarget.IsValidTarget(_w.Range))
-                            nextSpell = _w;
+                        if (W.IsReady() && currentTarget.IsValidTarget(W.Range))
+                            nextSpell = W;
                         else
                         {
                             nextSpell = null;
@@ -665,8 +670,8 @@ namespace FedAllChampionsUtility
                     else if (SpellName == "RivenMartyr")
                     {
                         // Cancel W animation with Q
-                        if (_q.IsReady() && currentTarget.IsValidTarget(_q.Range))
-                            nextSpell = _q;
+                        if (Q.IsReady() && currentTarget.IsValidTarget(Q.Range))
+                            nextSpell = Q;
                         else
                         {
                             nextSpell = null;
@@ -676,10 +681,10 @@ namespace FedAllChampionsUtility
                     else if (SpellName == "ItemTiamatCleave")
                     {
                         // Cancel tiamat animation with W or Q
-                        if (_w.IsReady() && currentTarget.IsValidTarget(_w.Range))
-                            nextSpell = _w;
-                        else if (_q.IsReady() && currentTarget.IsValidTarget(_q.Range))
-                            nextSpell = _q;
+                        if (W.IsReady() && currentTarget.IsValidTarget(W.Range))
+                            nextSpell = W;
+                        else if (Q.IsReady() && currentTarget.IsValidTarget(Q.Range))
+                            nextSpell = Q;
                     }
                     else if (SpellName == "RivenFengShuiEngine")
                     {
@@ -696,13 +701,13 @@ namespace FedAllChampionsUtility
                             nextSpell = null;
                             useTiamat = true;
                         }
-                        else if (_q.IsReady() && currentTarget.IsValidTarget(_q.Range))
+                        else if (Q.IsReady() && currentTarget.IsValidTarget(Q.Range))
                         {
-                            nextSpell = _q;
+                            nextSpell = Q;
                         }
-                        else if (_e.IsReady())
+                        else if (E.IsReady())
                         {
-                            nextSpell = _e;
+                            nextSpell = E;
                         }
                     }
                 }
@@ -711,17 +716,17 @@ namespace FedAllChampionsUtility
 
         private static void GapClose(Obj_AI_Base target)
         {
-            var useE = _e.IsReady();
-            var useQ = _q.IsReady() && qCount < 2 && Program.Menu.SubMenu("Combo").Item("UseQGapClose").GetValue<bool>();
+            var useE = E.IsReady();
+            var useQ = Q.IsReady() && qCount < 2 && Program.Menu.SubMenu("Combo").Item("UseQGapClose").GetValue<bool>();
             if (lastGapClose + 300 > Environment.TickCount && lastGapClose != 0)
                 return;
 
             lastGapClose = Environment.TickCount;
 
             float aRange = Player.AttackRange + Player.BoundingRadius + target.BoundingRadius;
-            float eRange = aRange + _e.Range;
-            float qRange = _q.Range + aRange;
-            float eqRange = _q.Range + _e.Range;
+            float eRange = aRange + E.Range;
+            float qRange = Q.Range + aRange;
+            float eqRange = Q.Range + E.Range;
             float distance = Player.Distance(target.ServerPosition);
             if (distance < aRange)
                 return;
@@ -732,24 +737,24 @@ namespace FedAllChampionsUtility
             if (_ghostblade.IsReady())
                 _ghostblade.Cast();
 
-            if (useQ && qCount < 2 && _q.IsReady() && qRange > distance && !_e.IsReady())
+            if (useQ && qCount < 2 && Q.IsReady() && qRange > distance && !E.IsReady())
             {
                 var noRComboDmg = DamageCalcNoR(target);
-                if (_r.IsReady() && !ultiReady && noRComboDmg < target.Health && Program.Menu.SubMenu("Combo").Item("UseUlti").GetValue<bool>())
+                if (R.IsReady() && !ultiReady && noRComboDmg < target.Health && Program.Menu.SubMenu("Combo").Item("UseUlti").GetValue<bool>())
                 {
-                    _r.Cast();
+                    R.Cast();
                 }
-                _q.Cast(target.ServerPosition, true);
+                Q.Cast(target.ServerPosition, true);
             }
-            else if (_e.IsReady() && eRange > distance + aRange)
+            else if (E.IsReady() && eRange > distance + aRange)
             {
                 var pred = Prediction.GetPrediction(target, 0, 0, 1450);
-                _e.Cast(pred.CastPosition);
+                E.Cast(pred.CastPosition);
             }
-            else if (useQ && _e.IsReady() && _q.IsReady() && eqRange + aRange > distance)
+            else if (useQ && E.IsReady() && Q.IsReady() && eqRange + aRange > distance)
             {
                 var pred = Prediction.GetPrediction(target, 0, 0, 1450);
-                _e.Cast(pred.CastPosition);
+                E.Cast(pred.CastPosition);
             }
         }
 
@@ -759,18 +764,18 @@ namespace FedAllChampionsUtility
             {
                 if (hero.Team != Player.Team && !hero.IsDead && hero.IsVisible)
                 {
-                    if (ultiReady && Program.Menu.SubMenu("KS").Item("KillStealR").GetValue<bool>() && hero.IsValidTarget(_r.Range - 30) && GetRDamage(hero) - 20 >= hero.Health)
+                    if (ultiReady && Program.Menu.SubMenu("KS").Item("KillStealR").GetValue<bool>() && hero.IsValidTarget(R.Range - 30) && GetRDamage(hero) - 20 >= hero.Health)
                     {
-                        _r.Cast(hero, true, true);
+                        R.Cast(hero, true, true);
                         IsKSing = false;
                     }
-                    else if (Program.Menu.SubMenu("KS").Item("KillStealQ").GetValue<bool>() && _q.IsReady() && hero.IsValidTarget(_q.Range) && GetQDamage(hero) - 10 >= hero.Health)
+                    else if (Program.Menu.SubMenu("KS").Item("KillStealQ").GetValue<bool>() && Q.IsReady() && hero.IsValidTarget(Q.Range) && GetQDamage(hero) - 10 >= hero.Health)
                     {
-                        _q.Cast(hero.ServerPosition);
+                        Q.Cast(hero.ServerPosition);
                     }
-                    else if (Program.Menu.SubMenu("KS").Item("KillStealW").GetValue<bool>() && _w.IsReady() && hero.IsValidTarget(_w.Range) && GetWDamage(hero) - 10 >= hero.Health)
+                    else if (Program.Menu.SubMenu("KS").Item("KillStealW").GetValue<bool>() && W.IsReady() && hero.IsValidTarget(W.Range) && GetWDamage(hero) - 10 >= hero.Health)
                     {
-                        _w.Cast();
+                        W.Cast();
                     }
                     else if (Program.Menu.SubMenu("KS").Item("KillStealT").GetValue<bool>() && (_tiamat.IsReady() || _tiamat2.IsReady()) && hero.IsValidTarget(_tiamat.Range) && Damage.GetItemDamage(Player, hero, Damage.DamageItems.Tiamat) >= hero.Health)
                     {
@@ -779,10 +784,10 @@ namespace FedAllChampionsUtility
                         if (_tiamat2.IsReady())
                             _tiamat2.Cast();
                     }
-                    else if (!ultiReady && !ultiOn && Program.Menu.SubMenu("KS").Item("KillStealR").GetValue<bool>() && Program.Menu.SubMenu("KS").Item("KillStealRActivate").GetValue<bool>() && hero.IsValidTarget(_r.Range - 30) && GetRDamage(hero) - 20 >= hero.Health && Program.Orbwalker.ActiveMode.ToString() != "Combo")
+                    else if (!ultiReady && !ultiOn && Program.Menu.SubMenu("KS").Item("KillStealR").GetValue<bool>() && Program.Menu.SubMenu("KS").Item("KillStealRActivate").GetValue<bool>() && hero.IsValidTarget(R.Range - 30) && GetRDamage(hero) - 20 >= hero.Health && Program.Orbwalker.ActiveMode.ToString() != "Combo")
                     {
                         IsKSing = true;
-                        _r.Cast();
+                        R.Cast();
                     }
                 }
             }
@@ -807,7 +812,7 @@ namespace FedAllChampionsUtility
 
         public static void CastJump()
         {
-            _q.Cast(endPoint, true);
+            Q.Cast(endPoint, true);
             Player.IssueOrder(GameObjectOrder.HoldPosition, Player.ServerPosition);
             Utility.DelayAction.Add(1000, delegate { freeFunction(); });
         }
