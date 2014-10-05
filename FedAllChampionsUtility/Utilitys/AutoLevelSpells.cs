@@ -19,7 +19,7 @@ namespace FedAllChampionsUtility
         public AutoLevelSpells()
         {
             _menu = Program.Menu.AddSubMenu(new Menu("Auto Level Spells", "AutoLevelSpells"));
-            _menu.AddItem(new MenuItem("AutoLevelSpells", "AutoLevel: " + ObjectManager.Player.ChampionName).SetValue(true));
+            _menu.AddItem(new MenuItem("AutoLevelSpells", "AutoLevel: " + ObjectManager.Player.ChampionName).SetValue(false));
 
             #region AbilitySequence...
 
