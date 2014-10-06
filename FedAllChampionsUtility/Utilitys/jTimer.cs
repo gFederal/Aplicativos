@@ -239,14 +239,7 @@ namespace FedAllChampionsUtility
         {
             GameObject.OnCreate += ObjectOnCreate;
             GameObject.OnDelete += ObjectOnDelete;
-            Drawing.OnDraw += OnDraw;
-            Game.PrintChat(
-                string.Format(
-                    "<font color='#F7A100'>{0} v{1} loaded.</font>",
-                    Assembly.GetExecutingAssembly().GetName().Name,
-                    Assembly.GetExecutingAssembly().GetName().Version
-                    )
-                );
+            Drawing.OnDraw += OnDraw;           
         }
 
         private void OnGameUpdate(EventArgs args)
@@ -276,7 +269,7 @@ namespace FedAllChampionsUtility
                             TimeSpan time = TimeSpan.FromSeconds(minionCamp.RespawnTimer.TotalSeconds - delta);
                             Vector2 pos = Drawing.WorldToMinimap(minionCamp.Position);
                             string display = string.Format("{0}:{1:D2}", time.Minutes, time.Seconds);
-                            Drawing.DrawText(pos.X - display.Length * 3, pos.Y - 5, Color.Yellow, display);
+                            Drawing.DrawText(pos.X - display.Length * 3, pos.Y - 5, Color.LimeGreen, display);
                         }
                     }
                 }

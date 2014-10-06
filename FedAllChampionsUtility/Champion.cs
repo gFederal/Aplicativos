@@ -1,9 +1,11 @@
 ﻿using System.Collections.Generic;
+using System.Reflection;
 using System.Data.SqlClient;
 using System.Linq;
 using LeagueSharp;
 using LeagueSharp.Common;
 using SharpDX;
+
 
 namespace FedAllChampionsUtility
 {
@@ -19,7 +21,14 @@ namespace FedAllChampionsUtility
 
         public void PluginLoaded()
         {            
-            Chat.Print("Fed" + ObjectManager.Player.ChampionName + " Loaded!"); 
+            Chat.Print("Fed" + ObjectManager.Player.ChampionName + " Loaded!");
+            Game.PrintChat(
+               string.Format(
+                   "<font color='#F7A100'>{0} v{1} loaded.</font>",
+                   Assembly.GetExecutingAssembly().GetName().Name,
+                   Assembly.GetExecutingAssembly().GetName().Version
+                   )
+               );
         }
 
 		public bool Packets()
