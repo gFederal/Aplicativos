@@ -15,8 +15,7 @@ namespace FedAllChampionsUtility
 {
     class Twitch : Champion
     {
-        public static Spell Q, W, E, R;
-        public int ExpungeBuffStacks = 0;
+        public static Spell Q, W, E, R;        
         
         public Twitch()
         {
@@ -36,8 +35,7 @@ namespace FedAllChampionsUtility
             E = new Spell(SpellSlot.E, 1200f);
             R = new Spell(SpellSlot.R, 850f);
 
-            W.SetSkillshot(0.25f, 150f, 1400f, false, SkillshotType.SkillshotCircle);
-            
+            W.SetSkillshot(0.25f, 120f, 1400f, false, SkillshotType.SkillshotCircle);            
         }
 
         private void LoadMenu()
@@ -85,7 +83,6 @@ namespace FedAllChampionsUtility
             {
                 CastE();
             }
-
         }
 
         private void Combo()
@@ -95,7 +92,7 @@ namespace FedAllChampionsUtility
                 CastW();
             }
 
-            if (Program.Menu.Item("UseECombo").GetValue<bool>() && E.IsReady())
+            if (Program.Menu.Item("UseECombo").GetValue<bool>())
             {
                 CastE();
             }
@@ -143,9 +140,7 @@ namespace FedAllChampionsUtility
                 case 3:
                     W.Cast(wTarget);
                     break;
-            }          
-
-            
+            } 
         }
 
         private void CastE()
@@ -154,13 +149,25 @@ namespace FedAllChampionsUtility
             var eStacks = Program.Menu.Item("UseEStacks").GetValue<Slider>().Value;
             var AutoEKS = Program.Menu.Item("UseEKS").GetValue<bool>();
 
-            if (eTarget.IsValidTarget() && eTarget.HasBuff("TwitchDeadlyVenom"))
-                ExpungeBuffStacks = (from buff in eTarget.Buffs
-                                     where buff.DisplayName.ToLower() == "twitchdeadlyvenom"
-                                     select buff.Count).FirstOrDefault();
-            if (!eTarget.IsMinion && (ExpungeBuffStacks >= eStacks || (AutoEKS && eTarget.HasBuff("TwitchDeadlyVenom") && eTarget.Health < ObjectManager.Player.GetSpellDamage(eTarget, SpellSlot.E) - 15)))
-                E.Cast();
-        }
+            if (eTarget.IsValidTarget(E.Range) && E.IsReady())
+            {
+                foreach (var buff in eTarget.Buffs.Where(buff => buff.DisplayName.ToLower() == "twitchdeadlyvenom").Where(buff => buff.Count >= eStacks))
+                {
+                    E.Cast();
+                }
+
+                if (AutoEKS)
+                {
+                    foreach (var hero in ObjectManager.Get<Obj_AI_Hero>().Where(hero => ObjectManager.Player.GetSpellDamage(hero, SpellSlot.E) - 10 > hero.Health))
+                    {
+                        if (hero.HasBuff("TwitchDeadlyVenom"))
+                        {
+                            E.Cast();
+                        }
+                    }                
+                }
+            }
+        } 
 
         private bool IsEnemyHealthLow(Obj_AI_Hero enemy)
         {
@@ -191,9 +198,7 @@ namespace FedAllChampionsUtility
 
             if (Program.Menu.Item("Draw_R").GetValue<bool>())
                 if (R.Level > 0)
-                    Utility.DrawCircle(ObjectManager.Player.Position, R.Range, R.IsReady() ? Color.Green : Color.Red);
-
-           
+                    Utility.DrawCircle(ObjectManager.Player.Position, R.Range, R.IsReady() ? Color.Green : Color.Red);           
         }
         
     }

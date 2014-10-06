@@ -266,10 +266,7 @@ namespace FedAllChampionsUtility
 					W.Cast(target.Position, Packets());
 				}
 			}
-		}
-
-		
-
+		}	
 
 		private void CastE()
 		{
