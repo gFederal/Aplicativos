@@ -72,6 +72,7 @@
     <Compile Include="Champions\Jungles\Maokai.cs" />
     <Compile Include="Champions\Jungles\Amumu.cs" />
     <Compile Include="Champions\Jungles\Nocturne.cs" />
+    <Compile Include="Champions\MidLines\Katarina.cs" />
     <Compile Include="Champions\MidLines\Leblanc.cs" />
     <Compile Include="Champions\MidLines\TwistedFate.cs" />
     <Compile Include="Champions\MidLines\Yasuo.cs" />
@@ -151,6 +152,9 @@
     <Compile Include="wJumper.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Reference Include="BuffManagerLib">
+      <HintPath>C:\Users\Fernando\Desktop\AssemblyInstaller\LSharp\System\BuffManagerLib.dll</HintPath>
+    </Reference>
     <Reference Include="clipper_library, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>C:\Users\Fernando\Desktop\AssemblyInstaller\LSharp\System\clipper_library.dll</HintPath>

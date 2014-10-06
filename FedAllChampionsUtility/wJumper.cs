@@ -38,7 +38,15 @@ namespace FedAllChampionsUtility
 
         public static void wardJump(Vector2 pos)
         {
-            Q = new Spell(SpellSlot.Q, 700);
+            if (Player.BaseSkinName == "Katarina")
+            {
+                Q = new Spell(SpellSlot.E, 700);
+            }
+            else
+            {
+                Q = new Spell(SpellSlot.Q, 700);
+            }
+
             Vector2 posStart = pos;
             if (!Q.IsReady())
                 return;
