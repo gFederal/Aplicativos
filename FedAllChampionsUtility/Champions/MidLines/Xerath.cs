@@ -63,6 +63,7 @@ namespace FedAllChampionsUtility
             Program.Menu.AddSubMenu(new Menu("Passive", "Passive"));
             Program.Menu.SubMenu("Passive").AddItem(new MenuItem("useE_Interupt", "Use E Interrupt").SetValue(true));
             Program.Menu.SubMenu("Passive").AddItem(new MenuItem("AutoEGC", "Use E Gapcloser").SetValue(true));
+            Program.Menu.SubMenu("Passive").AddItem(new MenuItem("AutoRKS", "R Automatico").SetValue(false));
             Program.Menu.SubMenu("Passive").AddItem(new MenuItem("useR_KS", "Use R for KS").SetValue((new KeyBind("T".ToCharArray()[0], KeyBindType.Press))));
             Program.Menu.SubMenu("Passive").AddItem(new MenuItem("useR_safe", "Saferange").SetValue(new Slider(700, 2000, 0)));
             Program.Menu.SubMenu("Passive").AddItem(new MenuItem("useR_Killabletext", "Write if is killable").SetValue(true));
@@ -171,7 +172,7 @@ namespace FedAllChampionsUtility
 
         private void R_Check()
         {
-            if (!Program.Menu.Item("useR_KS").GetValue<KeyBind>().Active)
+            if (!Program.Menu.Item("useR_KS").GetValue<KeyBind>().Active && !Program.Menu.Item("AutoRKS").GetValue<bool>())
                 return;
             if (!R.IsReady() && !IsShooting())
                 return;
