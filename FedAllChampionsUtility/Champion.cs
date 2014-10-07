@@ -37,7 +37,7 @@ namespace FedAllChampionsUtility
 		}
 
 		public void MenuBasics()
-		{ 
+		{            
             Program.Menu.AddSubMenu(new Menu("Packet Setting", "Packets"));
             Program.Menu.SubMenu("Packets").AddItem(new MenuItem("Packets_sep0", "===== Settings"));
             Program.Menu.SubMenu("Packets").AddItem(new MenuItem("usePackets", "= Use Packets").SetValue(true));
