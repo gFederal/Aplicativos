@@ -10,8 +10,8 @@ using SharpDX;
 namespace FedAllChampionsUtility
 {
 	class Champion
-	{
-		public static List<string> ManaManagerList = new List<string>();
+	{  
+        public static List<string> ManaManagerList = new List<string>();
 
         public Champion()
         {            
@@ -37,8 +37,8 @@ namespace FedAllChampionsUtility
 		}
 
 		public void MenuBasics()
-		{
-			Program.Menu.AddSubMenu(new Menu("Packet Setting", "Packets"));
+		{ 
+            Program.Menu.AddSubMenu(new Menu("Packet Setting", "Packets"));
             Program.Menu.SubMenu("Packets").AddItem(new MenuItem("Packets_sep0", "===== Settings"));
             Program.Menu.SubMenu("Packets").AddItem(new MenuItem("usePackets", "= Use Packets").SetValue(true));
             Program.Menu.SubMenu("Packets").AddItem(new MenuItem("Packets_sep1", "========="));
@@ -283,6 +283,18 @@ namespace FedAllChampionsUtility
 			var y = positionMe.Y - positionEnemy.Y;
 			return new Vector3(positionMe.X + x, positionMe.Y + y, positionMe.Z);
 		}
+        public bool EnemysinRange(float range, int min = 1, Obj_AI_Hero unit = null)
+        {
+            if (unit == null)
+                unit = ObjectManager.Player;
+            return min <= Program.AllHerosEnemy.Count(hero => hero.Distance(unit) < range && hero.IsValidTarget());
+        }
+
+        public static bool IsInsideEnemyTower(Vector3 position)
+        {
+            return ObjectManager.Get<Obj_AI_Turret>()
+                                    .Any(tower => tower.IsEnemy && tower.Health > 0 && tower.Position.Distance(position) < 775);
+        }
 
         public float GetManaPercent()
         {

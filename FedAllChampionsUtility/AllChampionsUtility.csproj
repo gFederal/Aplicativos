@@ -66,6 +66,7 @@
   <ItemGroup>
     <Compile Include="Champions\Jungles\Vi.cs" />
     <Compile Include="Champions\MidLines\Yasuo\Missle.cs" />
+    <Compile Include="Champions\TopLines\Ryze.cs" />
     <Compile Include="Utilitys\CardSelector.cs" />
     <Compile Include="Champions\AdCarrys\Caitlyn.cs" />
     <Compile Include="Champions\AdCarrys\Twitch.cs" />
