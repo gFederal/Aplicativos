@@ -69,6 +69,10 @@ namespace FedAllChampionsUtility
             Program.Menu.SubMenu("Passive").AddItem(new MenuItem("useR_Killabletext", "Write if is killable").SetValue(true));
             Program.Menu.SubMenu("Passive").AddItem(new MenuItem("useR_Killableping", "Ping if is killable").SetValue(true));
             Program.Menu.SubMenu("Passive").AddItem(new MenuItem("useR_warning", "warn if active").SetValue(false));
+            Program.Menu.SubMenu("Passive").AddSubMenu(new Menu("Dont use R on", "DontUlt"));
+
+            foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.Team != ObjectManager.Player.Team))
+                Program.Menu.SubMenu("Passive").SubMenu("DontUlt").AddItem(new MenuItem("DontUlt" + enemy.BaseSkinName, enemy.BaseSkinName).SetValue(false));
 
             //Damage after combo:
             var dmgAfterComboItem = new MenuItem("DamageAfterCombo", "Draw damage after combo").SetValue(true);
@@ -140,6 +144,7 @@ namespace FedAllChampionsUtility
             {
                 foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(h => h.IsValidTarget(GetRRange()) && (float)ObjectManager.Player.GetSpellDamage(h, SpellSlot.R) * 3 > h.Health))
                 {
+                    if (Program.Menu.Item("DontUlt" + enemy.BaseSkinName) != null && Program.Menu.Item("DontUlt" + enemy.BaseSkinName).GetValue<bool>() == false)
                     Ping(enemy.Position.To2D());
                 }
             }
@@ -177,14 +182,18 @@ namespace FedAllChampionsUtility
             if (!R.IsReady() && !IsShooting())
                 return;
             if (Utility.CountEnemysInRange(Program.Menu.Item("useR_safe").GetValue<Slider>().Value) >= 1 && !IsShooting())
-                return;
+                return;            
+
             R.Range = GetRRange();
             Obj_AI_Hero[] lowesttarget = { null };
             foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(hero => hero.IsValidTarget(R.Range)).Where(enemy => lowesttarget[0] == null || lowesttarget[0].Health > enemy.Health))
             {
                 lowesttarget[0] = enemy;
-            }
-            if (lowesttarget[0] != null && lowesttarget[0].Health < (((float)ObjectManager.Player.GetSpellDamage(lowesttarget[0], SpellSlot.R) * 3) * 0.9) && Environment.TickCount - UltTick >= 700)
+            }            
+
+            if (lowesttarget[0] != null && Program.Menu.Item("DontUlt" + lowesttarget[0].BaseSkinName) != null &&
+                Program.Menu.Item("DontUlt" + lowesttarget[0].BaseSkinName).GetValue<bool>() == false && 
+                lowesttarget[0].Health < (((float)ObjectManager.Player.GetSpellDamage(lowesttarget[0], SpellSlot.R) * 3) * 0.9) && Environment.TickCount - UltTick >= 700)
             {
                 R.Cast(lowesttarget[0], Packets());
                 UltTick = Environment.TickCount;
@@ -309,6 +318,7 @@ namespace FedAllChampionsUtility
             foreach (var target in Program.Helper.EnemyInfo.Where(x =>
              x.Player.IsVisible && x.Player.IsValidTarget(GetRRange()) && (((float)ObjectManager.Player.GetSpellDamage(x.Player, SpellSlot.R) * 3) * 0.9) >= x.Player.Health))
             {
+                if (Program.Menu.Item("DontUlt" + target.Player.BaseSkinName) != null && Program.Menu.Item("DontUlt" + target.Player.BaseSkinName).GetValue<bool>() == false)
                 victims += target.Player.ChampionName + " ";                
             }
             if (victims != "" && Program.Menu.Item("useR_Killabletext").GetValue<bool>())
