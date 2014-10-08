@@ -55,8 +55,7 @@ namespace FedAllChampionsUtility
 
         private void LoadMenu()
         {
-            Program.Menu.AddSubMenu(new Menu("Combo", "Combo"));
-            Program.Menu.SubMenu("Combo").AddItem(new MenuItem("ComboMode", "Combo Mode: ").SetValue(new StringList(new[] { "Q+R+W+E", "Q+W+R+E" }, 0)));
+            Program.Menu.AddSubMenu(new Menu("Combo", "Combo"));            
             Program.Menu.SubMenu("Combo").AddItem(new MenuItem("UseQCombo", "Use Q").SetValue(true));
             Program.Menu.SubMenu("Combo").AddItem(new MenuItem("UseWCombo", "Use W").SetValue(true));
             Program.Menu.SubMenu("Combo").AddItem(new MenuItem("UseECombo", "Use E").SetValue(true));
@@ -64,7 +63,8 @@ namespace FedAllChampionsUtility
             Program.Menu.SubMenu("Combo").AddItem(new MenuItem("UseDFGCombo", "Use DFG").SetValue(true));
             Program.Menu.SubMenu("Combo").AddItem(new MenuItem("BackCombo", "Back W LowHP/MP or delay").SetValue(true));
             Program.Menu.SubMenu("Combo").AddItem(new MenuItem("UseIgniteCombo", "Use Ignite").SetValue(true));
-            Program.Menu.SubMenu("Combo").AddItem(new MenuItem("ComboActive", "Combo!").SetValue(new KeyBind(32, KeyBindType.Press)));
+            Program.Menu.SubMenu("Combo").AddItem(new MenuItem("ComboActive", "Combo Q+R+W+E!").SetValue(new KeyBind(32, KeyBindType.Press)));
+            Program.Menu.SubMenu("Combo").AddItem(new MenuItem("ComboActive2", "Combo Q+W+R+E!").SetValue(new KeyBind("Z".ToCharArray()[0], KeyBindType.Press)));
 
             Program.Menu.AddSubMenu(new Menu("Harass", "Harass"));
             Program.Menu.SubMenu("Harass").AddItem(new MenuItem("UseQHarass", "Use Q").SetValue(true));
@@ -150,10 +150,15 @@ namespace FedAllChampionsUtility
 
             if (Program.Menu.Item("ComboActive").GetValue<KeyBind>().Active)
             {
-                Combo();
+                Combo1();
             }
             else
             {
+                if (Program.Menu.Item("ComboActive2").GetValue<KeyBind>().Active)
+                {
+                    Combo2();
+                }
+                
                 if (Program.Menu.Item("HarassActive").GetValue<KeyBind>().Active)
                     Harass();
 
@@ -193,22 +198,7 @@ namespace FedAllChampionsUtility
                 damage += ObjectManager.Player.GetSpellDamage(enemy, SpellSlot.Q);
 
             return (float)damage * (DFG.IsReady() ? 1.2f : 1);
-        }
-
-        private static void Combo()
-        {
-            var ComboMode = Program.Menu.Item("ComboMode").GetValue<StringList>().SelectedIndex;
-
-            switch (ComboMode)
-            {
-                case 0:
-                    Combo1();
-                    break;
-                case 1:
-                    Combo2();
-                    break;
-            }
-        }
+        }        
 
         private static void Combo1() // Q+R+W+E
         {
@@ -300,31 +290,37 @@ namespace FedAllChampionsUtility
             var userDFG = Program.Menu.Item("UseDFGCombo").GetValue<bool>();
             var UseIgniteCombo = Program.Menu.Item("UseIgniteCombo").GetValue<bool>();
 
-            if (Q.IsReady() && W.IsReady() && R.IsReady() && useQ && useR && useW)
+            ObjectManager.Player.IssueOrder(GameObjectOrder.MoveTo, Game.CursorPos);
+
+            if (Q.IsReady() && W.IsReady() && R.IsReady() && useQ && useW && useR)
             {
-                if (qTarget != null)
+                if (Q.IsReady() && qTarget != null)
                 {
                     Q.CastOnUnit(qTarget);
+                }
 
-                    if (userDFG && wTarget != null && comboDamage > wTarget.Health && DFG.IsReady() && W.IsReady() && R.IsReady())
-                    {
-                        DFG.Cast(wTarget);
-                    }
+                if (userDFG && wTarget != null && comboDamage > wTarget.Health && DFG.IsReady() && W.IsReady() && R.IsReady())
+                {
+                    DFG.Cast(wTarget);
+                }
 
-                    if (ObjectManager.Player.Spellbook.GetSpell(SpellSlot.R).Name.Contains("LeblancChaos"))
-                    {
-                        W.CastOnUnit(qTarget);
-                    }
+                if (wTarget != null && ObjectManager.Player.Spellbook.GetSpell(SpellSlot.R).Name.Contains("LeblancChaos") && !LeblancPulo())
+                {
+                    W.CastOnUnit(wTarget);
+                }
 
-                    if (ObjectManager.Player.Spellbook.GetSpell(SpellSlot.R).Name.Contains("LeblancSlideM") && LeblancPulo())
-                    {
-                        R.CastOnUnit(qTarget);
-                    }
-
+                if (rTarget != null && LeblancPulo())
+                {
+                    R.CastOnUnit(rTarget);
                 }
             }
             else
             {
+                if (rTarget != null && LeblancPulo())
+                {
+                    R.CastOnUnit(qTarget);
+                }
+
                 if (useE && eTarget != null && E.IsReady())
                 {
                     PredictionOutput ePred = E.GetPrediction(eTarget);
@@ -340,22 +336,17 @@ namespace FedAllChampionsUtility
                 if (useQ && qTarget != null && Q.IsReady())
                 {
                     Q.CastOnUnit(qTarget);
-                }
+                }                
 
-                if (useR && qTarget != null && R.IsReady() && (ObjectManager.Player.Spellbook.GetSpell(SpellSlot.R).Name.Contains("LeblancChaos") ||
-                                                               ObjectManager.Player.Spellbook.GetSpell(SpellSlot.R).Name.Contains("LeblancSlideM")))
-                {
-                    R.Cast(qTarget);
-                }
-
-                if (Program.Menu.Item("BackCombo").GetValue<bool>() && LeblancPulo() && (qTarget == null ||
-                    !W.IsReady() && !Q.IsReady() && !R.IsReady() ||
-                    GetHPPercent() < 15 ||
-                    GetMPPercent() < 15))
+                if (Program.Menu.Item("BackCombo").GetValue<bool>() && LeblancPulo() && (qTarget == null && wTarget == null && eTarget == null && rTarget == null ||
+                !W.IsReady() && !Q.IsReady() && !R.IsReady() && !E.IsReady() ||
+                GetHPPercent() < 15 ||
+                GetMPPercent() < 10))
                 {
                     W.Cast();
                 }
             }
+            
 
             if (wTarget != null && IgniteSlot != SpellSlot.Unknown &&
                         ObjectManager.Player.SummonerSpellbook.CanUseSpell(IgniteSlot) == SpellState.Ready)
@@ -365,7 +356,7 @@ namespace FedAllChampionsUtility
                     ObjectManager.Player.SummonerSpellbook.CastSpell(IgniteSlot, wTarget);
                 }
             }
-        }
+        }        
 
         private static float GetHPPercent()
         {
@@ -398,7 +389,7 @@ namespace FedAllChampionsUtility
                 return false;
             }
         }
-
+        
         private static void Harass()
         {
             var target = SimpleTs.GetTarget(Q.Range, SimpleTs.DamageType.Magical);
