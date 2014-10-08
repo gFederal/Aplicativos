@@ -290,6 +290,11 @@ namespace FedAllChampionsUtility
             return min <= Program.AllHerosEnemy.Count(hero => hero.Distance(unit) < range && hero.IsValidTarget());
         }
 
+        public bool EnemysinRange(float range, int min, Vector3 pos)
+        {
+            return min <= Program.AllHerosEnemy.Count(hero => hero.Position.Distance(pos) < range && hero.IsValidTarget() && !hero.IsDead);
+        }
+
         public static bool IsInsideEnemyTower(Vector3 position)
         {
             return ObjectManager.Get<Obj_AI_Turret>()
