@@ -76,7 +76,7 @@ namespace FedAllChampionsUtility
 
             Orbwalking.BeforeAttack += BeforeAttack;
             Obj_AI_Base.OnProcessSpellCast += OnProcessSpell;
-            Obj_AI_Base.OnPlayAnimation += OnAnimation;
+            //Obj_AI_Base.OnPlayAnimation += OnAnimation;
             Game.OnGameUpdate += OnGameUpdate;
             Game.OnGameUpdate += Buffs_GameUpdate;
             Game.OnGameProcessPacket += OnGameProcessPacket;
@@ -484,6 +484,7 @@ namespace FedAllChampionsUtility
             }
         }
 
+        /*
         public static void OnAnimation(Obj_AI_Base unit, GameObjectPlayAnimationEventArgs args)
         {
             if (unit.IsMe && Program.Orbwalker.ActiveMode.ToString() == "Combo") // Spell1 = Q
@@ -495,7 +496,7 @@ namespace FedAllChampionsUtility
                 }
             }
         }
-
+        */
         public static void CancelAnimation()
         {
             var movePos = Game.CursorPos;
@@ -508,7 +509,8 @@ namespace FedAllChampionsUtility
             //Packet.C2S.Move.Encoded(new Packet.C2S.Move.Struct(movePos.X, movePos.Y)).Send();
             Player.IssueOrder(GameObjectOrder.MoveTo, movePos);
 
-        }
+        }         
+
         private static double GetRDamage(Obj_AI_Base target) // DamageLib doesn't do this correctly yet
         {
             var minDmg = 0.0;
