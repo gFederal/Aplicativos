@@ -76,7 +76,7 @@ namespace FedAllChampionsUtility
 
             Orbwalking.BeforeAttack += BeforeAttack;
             Obj_AI_Base.OnProcessSpellCast += OnProcessSpell;
-            //Obj_AI_Base.OnPlayAnimation += OnAnimation;
+            Obj_AI_Base.OnPlayAnimation += OnAnimation;
             Game.OnGameUpdate += OnGameUpdate;
             Game.OnGameUpdate += Buffs_GameUpdate;
             Game.OnGameProcessPacket += OnGameProcessPacket;
@@ -484,8 +484,8 @@ namespace FedAllChampionsUtility
             }
         }
 
-        /*
-        public static void OnAnimation(Obj_AI_Base unit, GameObjectPlayAnimationEventArgs args)
+
+        public static void OnAnimation(GameObject unit, GameObjectPlayAnimationEventArgs args)
         {
             if (unit.IsMe && Program.Orbwalker.ActiveMode.ToString() == "Combo") // Spell1 = Q
             {
@@ -496,7 +496,7 @@ namespace FedAllChampionsUtility
                 }
             }
         }
-        */
+        
         public static void CancelAnimation()
         {
             var movePos = Game.CursorPos;
