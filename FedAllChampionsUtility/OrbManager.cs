@@ -20,6 +20,9 @@ namespace FedAllChampionsUtility
         public static int tmpWOrbT;
         public static Vector3 tmpWOrbPos = new Vector3();
 
+        public static bool ActiveRecv = false;
+        public static Byte Activebyte = 0x00;
+
 
         static OrbManager()
         {
@@ -58,12 +61,24 @@ namespace FedAllChampionsUtility
                 packet.Position = 1;
                 var networkId = packet.ReadInteger();
                 var leByte = packet.ReadByte();
-                var active = (leByte == 0x01 || leByte == 0xDD);
+                var active = (leByte == 0x01);
 
-                if (active)
-                    WObjectNetworkId = networkId;
-                else
-                    WObjectNetworkId = -1;
+                if (ActiveRecv)
+                {
+                    Activebyte = leByte;
+                }
+
+                ActiveRecv = active;
+
+                if (ActiveRecv || leByte == Activebyte)
+               {
+                     WObjectNetworkId = networkId;
+                }
+                 else
+                {
+                     WObjectNetworkId = -1;
+                    Activebyte = 0x00;
+                }  
             }
         }
 
