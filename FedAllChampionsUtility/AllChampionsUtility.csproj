@@ -64,6 +64,7 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Champions\Jungles\Sion.cs" />
     <Compile Include="Champions\Jungles\Vi.cs" />
     <Compile Include="Champions\MidLines\Orianna.cs" />
     <Compile Include="Champions\MidLines\Yasuo\Missle.cs" />
